@@ -20,6 +20,9 @@
 *.mod
 *.smod
 
+Makefile
+CzenginePlusPlus.make
+
 # Compiled Static libraries
 *.lai
 *.la
