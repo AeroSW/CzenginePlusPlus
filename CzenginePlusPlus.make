@@ -19,7 +19,7 @@ endif
 # #############################################
 
 RESCOMP = windres
-INCLUDES +=
+INCLUDES += -Iinclude/core -Iinclude/windowing-manager -Ilib/SDL2/include/SDL2
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -38,19 +38,19 @@ TARGETDIR = bin/Win64/Debug
 TARGET = $(TARGETDIR)/CzenginePlusPlus.exe
 OBJDIR = obj/Win64/Debug
 DEFINES += -DDEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++23
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++23
+ALL_LDFLAGS += $(LDFLAGS) -Llib/SDL2 -L/usr/lib64 -m64 lib/SDL2/bin/SDL2.dll -std=c++23
 
 else ifeq ($(config),release_win64)
 TARGETDIR = bin/Win64/Release
 TARGET = $(TARGETDIR)/CzenginePlusPlus.exe
 OBJDIR = obj/Win64/Release
 DEFINES += -DNDEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
-CC=g++
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++23
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++23
+ALL_LDFLAGS += $(LDFLAGS) -Llib/SDL2 -L/usr/lib64 -m64 -s lib/SDL2/bin/SDL2.dll -std=c++23
+cc=g++, cxx=g++
 
 
 endif
@@ -66,7 +66,11 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/czengine.o
+GENERATED += $(OBJDIR)/sdl-window.o
+GENERATED += $(OBJDIR)/window.o
 OBJECTS += $(OBJDIR)/czengine.o
+OBJECTS += $(OBJDIR)/sdl-window.o
+OBJECTS += $(OBJDIR)/window.o
 
 # Rules
 # #############################################
@@ -131,6 +135,12 @@ endif
 # #############################################
 
 $(OBJDIR)/czengine.o: src/czengine.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/sdl-window.o: src/windowing-manager/sdl-window.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/window.o: src/windowing-manager/window.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
