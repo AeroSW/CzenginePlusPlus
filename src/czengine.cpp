@@ -21,8 +21,5 @@ int main() {
         std::cerr << err_msg << "\n";
         return -1;
     }
-    while(window->isOpen()) {
-        std::cout << "Window is open\n";
-    }
     return 0;
 }

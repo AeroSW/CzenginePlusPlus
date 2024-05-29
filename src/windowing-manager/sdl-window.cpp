@@ -1,11 +1,8 @@
 #include "inttypes.hpp"
 #include "sdl-window.hpp"
 #include <iostream>
-#include <functional>
 #include <memory>
 #include <string>
-
-//const std::string window_sustain_thread_id = "SdlWindowSustainThread";
 
 SdlWindow::SdlWindow(const WindowProperties &properties) : Window(properties),
     sustain(false) {
@@ -78,22 +75,6 @@ void SdlWindow::sustainEventLoop() {
     sustain = true;
     while(sustain) {
         std::cout << "SdlWindow Sustain: " << sustain << "\n";
-        SDL_Event sdl_event;
-        while(SDL_PollEvent(&sdl_event) > 0) {
-            switch (sdl_event.type) {
-                case SDL_QUIT:
-                    sustain = false;
-                    break;
-            }
-            SDL_UpdateWindowSurface(sdl_window);
-        }
-    }
-}
-
-void SdlWindow::sustainEventLoopAsync(std::stop_token window_stop_token) {
-    sustain = true;
-    while(sustain && !window_stop_token.stop_requested()) {
-        std::cout << "Sustain: " << sustain << " Stop Requested: " << window_stop_token.stop_requested() << "\n";
         SDL_Event sdl_event;
         while(SDL_PollEvent(&sdl_event) > 0) {
             switch (sdl_event.type) {

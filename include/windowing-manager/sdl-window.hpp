@@ -3,7 +3,6 @@
 #define SDL_MAIN_HANDLED
 #include "window.hpp"
 #include "SDL.h"
-#include <thread>
 
 class SdlWindow : public Window {
     private:
@@ -18,7 +17,6 @@ class SdlWindow : public Window {
         virtual bool addChild(const WindowProperties &properties);
         virtual std::unique_ptr<Window> cloneUniquely();
         virtual void sustainEventLoop();
-        virtual void sustainEventLoopAsync(std::stop_token window_stop_token);
         virtual bool isOpen();
         static ui32 X_CENTER;
         static ui32 Y_CENTER;
