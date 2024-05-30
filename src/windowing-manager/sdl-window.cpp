@@ -4,28 +4,54 @@
 #include <memory>
 #include <string>
 
-SdlWindow::SdlWindow(const WindowProperties &properties) : Window(properties),
-    sustain(false) {
+SwindowWrapper::SwindowWrapper(const WindowProperties &properties) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "Failed to initialize the SDL2 Library\n";
         throw "SDL Instantion failure";
     }
     sdl_window = SDL_CreateWindow(properties.name.c_str(),
-        properties.x_window_offset, properties.y_window_offset, properties.width, properties.height, 0);
+       properties.x_window_offset, properties.y_window_offset, properties.width, properties.height, 0);
+}
+SwindowWrapper::~SwindowWrapper() {
+    //if (sdl_window != nullptr) delete sdl_window;
+    SDL_DestroyWindow(sdl_window);
+}
+swindow * SwindowWrapper::get() const {
+    return sdl_window;
+}
+
+SsurfaceWrapper::SsurfaceWrapper(Shared<SwindowWrapper> swindow_wrapper) : sdl_window_wrapper(swindow_wrapper) {
+    sdl_surface = SDL_GetWindowSurface(swindow_wrapper->get());
+    if (!sdl_surface) {
+        throw "SDL Window Surface Creation Failed";
+    }
+}
+SsurfaceWrapper::~SsurfaceWrapper() {
+    if (sdl_surface != nullptr) delete sdl_surface;
+    SDL_DestroyWindowSurface(sdl_window_wrapper->get());
+}
+ssurface * SsurfaceWrapper::get() const {
+    return sdl_surface;
+}
+
+SdlWindow::SdlWindow(const WindowProperties &properties) : Window(properties),
+    sustain(false), sdl_window(new SwindowWrapper(properties)), sdl_window_surface(new SsurfaceWrapper(sdl_window.get())) {
+    sustainEventLoop();
+}
+
+SdlWindow::SdlWindow(const SdlWindow &window) : Window(window), sustain(window.sustain),
+    sdl_window(window.sdl_window), sdl_window_surface(window.sdl_window_surface) {
     if (!sdl_window) {
         throw "SDL Window Creation Failed";
     }
-    sdl_window_surface = SDL_GetWindowSurface(sdl_window);
     if (!sdl_window_surface) {
         throw "SDL Window Surface Creation Failed";
     }
     sustainEventLoop();
 }
 
-SdlWindow::SdlWindow(const SdlWindow &window) : Window(window), sdl_window(window.sdl_window),
-    sdl_window_surface(window.sdl_window_surface), sustain(window.sustain) {
-    sdl_window = window.sdl_window;
-    sdl_window_surface = window.sdl_window_surface;
+SdlWindow::SdlWindow(SdlWindow * window) : Window(*window), sustain(window->sustain),
+    sdl_window(window->sdl_window), sdl_window_surface(window->sdl_window_surface) {
     if (!sdl_window) {
         throw "SDL Window Creation Failed";
     }
@@ -35,27 +61,7 @@ SdlWindow::SdlWindow(const SdlWindow &window) : Window(window), sdl_window(windo
     sustainEventLoop();
 }
 
-SdlWindow::SdlWindow(SdlWindow * window) : Window(*window), sdl_window(window->sdl_window),
-    sdl_window_surface(window->sdl_window_surface), sustain(window->sustain) {
-    sdl_window = window->sdl_window;
-    sdl_window_surface = window->sdl_window_surface;
-    if (!sdl_window) {
-        throw "SDL Window Creation Failed";
-    }
-    if (!sdl_window_surface) {
-        throw "SDL Window Surface Creation Failed";
-    }
-    sustainEventLoop();
-}
-
-SdlWindow::~SdlWindow() {
-    if (sdl_window_surface != nullptr) {
-        delete sdl_window_surface;
-    }
-    if (sdl_window != nullptr) {
-        delete sdl_window;
-    }
-}
+SdlWindow::~SdlWindow() {}
 bool SdlWindow::addChild(const WindowProperties &properties) {
     try {
         this->children.push_back(std::unique_ptr<SdlWindow>(new SdlWindow(properties)));
@@ -74,15 +80,20 @@ std::unique_ptr<Window> SdlWindow::cloneUniquely() {
 void SdlWindow::sustainEventLoop() {
     sustain = true;
     while(sustain) {
-        std::cout << "SdlWindow Sustain: " << sustain << "\n";
         SDL_Event sdl_event;
         while(SDL_PollEvent(&sdl_event) > 0) {
+            std::cout << "Event detected!\n";
             switch (sdl_event.type) {
-                case SDL_QUIT:
-                    sustain = false;
-                    break;
+                case SDL_WINDOWEVENT:
+                    std::cout << "Window event detected!\n";
+                    switch(sdl_event.window.event) {
+                        case SDL_WINDOWEVENT_CLOSE:
+                            std::cout << "Close event detected!\n";
+                            sustain = false;
+                            break;
+                    }
             }
-            SDL_UpdateWindowSurface(sdl_window);
+            SDL_UpdateWindowSurface(sdl_window->get());
         }
     }
 }
