@@ -7,7 +7,8 @@
 
 int main() {
     std::cout << "Welcome to the Czengine Project\n";
-    std::unique_ptr<Window> window;
+    //std::unique_ptr<Window> window;
+    Shared<Window> window;
     try {
         WindowProperties props;
         props.height = 720;
@@ -15,11 +16,13 @@ int main() {
         props.x_window_offset = SdlWindow::X_CENTER;
         props.y_window_offset = SdlWindow::Y_CENTER;
         props.name = "AeroCzengine";
-        window = std::make_unique<SdlWindow>(new SdlWindow(props));
-
+        //window = std::make_unique<SdlWindow>(new SdlWindow(props));
+        window = Shared<Window>(new SdlWindow(props));
     } catch (std::string err_msg) {
         std::cerr << err_msg << "\n";
         return -1;
     }
+    // if (window != nullptr)
+    //     delete window;
     return 0;
 }
