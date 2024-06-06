@@ -92,7 +92,7 @@ namespace CzaraEngine {
         chrono::time_point<chrono::system_clock> now = chrono::system_clock::now();
         std::time_t t_c = chrono::system_clock::to_time_t(now);
         filename << std::put_time(std::localtime(&t_c), "%F_%H_%M");
-        filename << "_" << m_base_name;
+        filename << "_" << m_base_name << ".txt";
         return m_base_directory / filename.str();
     }
     std::ostream& TimeLogFile::write(const char * msg) {
@@ -137,7 +137,7 @@ namespace CzaraEngine {
     fs::path SizeLogFile::generateFileName() const {
         std::ostringstream filename;
         filename << m_base_name;
-        filename << std::setfill('0') << std::setw(m_suffix_length) << m_increment;
+        filename << std::setfill('0') << std::setw(m_suffix_length) << m_increment << ".txt";
         const_cast<SizeLogFile*>(this)->m_increment++;
         return m_base_directory / filename.str();
     }

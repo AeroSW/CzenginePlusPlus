@@ -4,33 +4,21 @@
 #include "window.hpp"
 #include "SDL.h"
 #include "shared.hpp"
+#include <thread>
+#include "wrapper.hpp"
+#include "sdl-wrapper.hpp"
 
 typedef SDL_Window swindow;
 typedef SDL_Surface ssurface;
 
 namespace CzaraEngine {
-
-    class SwindowWrapper {
-        public:
-            SwindowWrapper(const WindowProperties &properties);
-            virtual ~SwindowWrapper();
-            swindow * get() const;
-        private:
-            swindow * sdl_window;
-    };
-    class SsurfaceWrapper {
-        public:
-            SsurfaceWrapper(const Shared<SwindowWrapper> &swindow_wrapper);
-            virtual ~SsurfaceWrapper();
-            ssurface * get() const;
-        private:
-            Shared<SwindowWrapper> sdl_window_wrapper;
-            ssurface * sdl_surface;
-    };
-
+    typedef std::pair<SDL_Surface*, Shared<Wrapper<SDL_Window>>> SdlSurfacePair;
+    void destroySdlWindow();
+    void destroySdlSurface();
+    void destroySdlRenderer();
     class SdlWindow : public Window {
         public:
-            SdlWindow(const WindowProperties &properties);
+            SdlWindow(const WindowProperties &properties, const std::stop_token &stop_token);
             SdlWindow(const SdlWindow &window);
             SdlWindow(SdlWindow* window);
             virtual ~SdlWindow();
@@ -41,8 +29,10 @@ namespace CzaraEngine {
             static ui32 Y_CENTER;
         private:
             bool sustain = false;
-            Shared<SwindowWrapper> sdl_window;
-            Shared<SsurfaceWrapper> sdl_window_surface;
+            std::stop_token m_stop_token;
+            Shared<SdlWindowWrapper> sdl_window;
+            Shared<SdlSurfaceWrapper> sdl_window_surface;
+            Shared<SdlRendererWrapper> sdl_renderer;
     };
 
 }

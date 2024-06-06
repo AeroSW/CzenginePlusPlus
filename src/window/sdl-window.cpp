@@ -3,64 +3,30 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <functional>
 
 namespace CzaraEngine {
-    SwindowWrapper::SwindowWrapper(const WindowProperties &properties) {
-        std::cout << "SwindowWrapper::SwindowWrapper(const WindowProperties&)\n";
-        if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            std::cerr << "Failed to initialize the SDL2 Library\n";
-            throw "SDL Instantion failure";
-        }
-        sdl_window = SDL_CreateWindow(properties.name.c_str(),
-        properties.x_window_offset, properties.y_window_offset, properties.width, properties.height, 0);
-    }
-    SwindowWrapper::~SwindowWrapper() {
-        std::cout << "SwindowWrapper Destructor\n";
-        SDL_DestroyWindow(sdl_window);
-    }
-    swindow * SwindowWrapper::get() const {
-        std::cout << "SwindowWrapper::get()\n";
-        return sdl_window;
-    }
-
-    SsurfaceWrapper::SsurfaceWrapper(const Shared<SwindowWrapper> &swindow_wrapper) : sdl_window_wrapper(swindow_wrapper) {
-        std::cout << "SsurfaceWrapper::SsurfaceWrapper(const Shared<SwindowWrapper>&)\n";
-        sdl_surface = SDL_GetWindowSurface(sdl_window_wrapper->get());
-        if (!sdl_surface) {
-            throw "SDL Window Surface Creation Failed";
-        }
-    }
-    SsurfaceWrapper::~SsurfaceWrapper() {
-        std::cout << "SsurfaceWrapper Destructor\n";
-        SDL_DestroyWindowSurface(sdl_window_wrapper->get());
-    }
-    ssurface * SsurfaceWrapper::get() const {
-        std::cout << "SsurfaceWrapper::get()\n";
-        return sdl_surface;
-    }
-
-    SdlWindow::SdlWindow(const WindowProperties &properties) : Window(properties),
-        sustain(false), sdl_window(new SwindowWrapper(properties)), sdl_window_surface(new SsurfaceWrapper(sdl_window.get())) {
-        std::cout << "SdlWindow::SdlWindow(const WindowProperties &)\n";
-        std::cout << "Starting loop sustain.\n";
+    
+    SdlWindow::SdlWindow(const WindowProperties &properties, const std::stop_token &stop_token) :
+        Window(properties), sustain(false), sdl_window(new SdlWindowWrapper(properties)), 
+        sdl_window_surface(new SdlSurfaceWrapper(sdl_window)), m_stop_token(stop_token) {
         sustainEventLoop();
-        std::cout << "Ending loop sustain\n";
     }
 
     SdlWindow::SdlWindow(const SdlWindow &window) : Window(window), sustain(window.sustain),
-        sdl_window(window.sdl_window), sdl_window_surface(window.sdl_window_surface) {
-        std::cout << "SdlWindow::SdlWindow(const SdlWindow &)\n";
+        sdl_window(window.sdl_window), sdl_window_surface(window.sdl_window_surface), m_stop_token(window.m_stop_token) {
+
         if (sdl_window.isNullptr()) {
             throw "SDL Window Creation Failed";
         }
         if (sdl_window_surface.isNullptr()) {
             throw "SDL Window Surface Creation Failed";
         }
-        sustainEventLoop();
     }
 
     SdlWindow::SdlWindow(SdlWindow * window) : Window(*window), sustain(window->sustain),
-        sdl_window(window->sdl_window), sdl_window_surface(window->sdl_window_surface) {
+        sdl_window(window->sdl_window), sdl_window_surface(window->sdl_window_surface), m_stop_token(window->m_stop_token) {
+        
         std::cout << "SdlWindow::SdlWindow(WindowProperties *)\n";
         if (sdl_window.isNullptr()) {
             throw "SDL Window Creation Failed";
@@ -68,7 +34,6 @@ namespace CzaraEngine {
         if (sdl_window_surface.isNullptr()) {
             throw "SDL Window Surface Creation Failed";
         }
-        sustainEventLoop();
     }
 
     SdlWindow::~SdlWindow() {
@@ -76,7 +41,7 @@ namespace CzaraEngine {
     }
     bool SdlWindow::addChild(const WindowProperties &properties) {
         try {
-            this->children.push_back(Shared<Window>(new SdlWindow(properties)));
+            this->children.push_back(Shared<Window>(new SdlWindow(properties, m_stop_token)));
         } catch(ui8 errCode) {
             // ToDo: Implement logging for error
             std::cerr << "Error Code, " << errCode << ", was intercepted.\n";
@@ -87,7 +52,8 @@ namespace CzaraEngine {
 
     void SdlWindow::sustainEventLoop() {
         sustain = true;
-        while(sustain) {
+        std::cout << "Sustain: " << sustain << std::endl;
+        while(sustain && !(m_stop_token.stop_requested())) {
             SDL_Event sdl_event;
             while(SDL_PollEvent(&sdl_event) > 0 && sustain) {
                 std::cout << "Event detected!\n";
@@ -107,7 +73,7 @@ namespace CzaraEngine {
     }
 
     bool SdlWindow::isOpen() {
-        return sustain;
+        return sustain && !m_stop_token.stop_requested();
     }
 
     ui32 SdlWindow::X_CENTER = SDL_WINDOWPOS_CENTERED;

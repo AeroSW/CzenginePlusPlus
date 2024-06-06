@@ -52,7 +52,7 @@ namespace CzaraEngine {
     template<typename T>
     T& Singleton<T>::getReference() {
         if (m_reference == nullptr) {
-            THROW_EXCEPTION(EngineExceptionCode::MEMORY_EXCEPTION);
+            THROW_EXCEPTION(EngineExceptionCode::MEMORY_EXCEPTION, "m_reference should not be null.");
         }
         return *m_reference;
     }

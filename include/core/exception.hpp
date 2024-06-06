@@ -23,9 +23,9 @@ namespace CzaraEngine {
     
     #ifndef THROW_EXCEPTION
         // err_code is an EngineExceptionCode
-        #define THROW_EXCEPTION(err_code) \
+        #define THROW_EXCEPTION(err_code, msg) \
             std::ostringstream oss; \
-            oss << __FILE__ << " | " << __LINE__; \
+            oss << __FILE__ << "::" << __LINE__ << msg; \
             EngineException exc = {err_code, oss.str()};
     #endif
 }
