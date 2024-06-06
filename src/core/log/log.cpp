@@ -1,23 +1,21 @@
-// #include "log.hpp"
-// #include <sstream>
+#include "log.hpp"
+#include <memory>
+#include <iostream>
 
+namespace CzaraEngine {
+    std::ostream& operator<<(Log &log, const std::string &msg) {
+        return log.write(msg);
+    }
+    std::ostream& operator<<(Log &log, const char* msg) {
+        return log.write(msg);
+    }
+    std::ostream& operator<<(Log &log, std::ostream &stream) {
+        return log.write(stream);
+    }
 
-
-// // Log
-// Log::Log() {}
-// Log::~Log() {}
-// Shared<Log> Log::Create(const LogState &state) {
-//     Log::log_state = state;
-//     if (log.get() == nullptr) {
-//         log = Shared(new Log());
-//     }
-//     return log;
-// }
-// void Log::addFile(const LogFileProps &props) {
-//     Shared log_file{new LogFile(props)};
-//     log_file_map[props.base_name] = log_file;
-// }
-// void Log::setLogState(const LogState &state) {
-//     Log::log_state = state;
-// }
-// // End of Log
+    std::ostream& operator<<(std::ostream &stream, const Log& log) {
+        std::ostringstream output_stream = log.getClassDetails();
+        stream << output_stream.str();
+        return stream;
+    }
+}

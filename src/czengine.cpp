@@ -4,6 +4,7 @@
 #include "window.hpp"
 #include "sdl-window.hpp"
 #include "log-file.hpp"
+#include "app-configuration.hpp"
 
 namespace fs = std::filesystem;
 using namespace CzaraEngine;
@@ -11,10 +12,14 @@ using namespace CzaraEngine;
 int main() {
     std::cout << "Welcome to the Czengine Project\n";
     //Shared<Window> window;
+    if(!app_config.initReference<AppState>(AppState::__DEBUG__)) {
+        std::cerr << "Issue initializing Application Configuration." << std::endl;
+        return 1;
+    }
     LogFileProps app_log_props;
     fs::path current = fs::current_path();
     app_log_props.amount = 3600;
-    app_log_props.base_directory = "./logs";
+    app_log_props.base_directory = app_config.getReference().default_log_dir;
     app_log_props.base_name = "application.txt";
     
     Shared<LogFile> application_log{new TimeLogFile(app_log_props)};

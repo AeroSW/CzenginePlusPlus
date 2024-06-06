@@ -6,7 +6,7 @@
 
 namespace CzaraEngine {
     // LogFile
-    LogFile::LogFile(const LogFileProps &props) : m_amount(props.amount),
+    LogFile::LogFile(const LogFileProps &props) : Log(), m_amount(props.amount),
         m_base_name(props.base_name), m_base_directory(props.base_directory) {
         #ifdef _WIN32
             m_line_end = "\r\n";
@@ -45,6 +45,16 @@ namespace CzaraEngine {
         m_related_files.push_back(m_active_file);
         m_active_file = generateFileName();
         m_file.open(m_active_file);
+    }
+    std::string LogFile::endLine() {
+        #ifdef _WIN32
+            static std::string line_end = "\r\n";
+        #elif defined macintosh // OS 9
+            static std::string line_end = "\r";
+        #else
+            static std::string line_end = "\n"; // Mac OS X uses \n
+        #endif
+        return line_end;
     }
     // END LogFile
 
@@ -85,8 +95,11 @@ namespace CzaraEngine {
         filename << "_" << m_base_name;
         return m_base_directory / filename.str();
     }
-    //std::ostream& TimeLogFile::operator<<(std::ostream &msg){
     std::ostream& TimeLogFile::write(const char * msg) {
+        rotateFile();
+        return m_file << msg << m_line_end << std::endl;
+    }
+    std::ostream& TimeLogFile::write(const std::string &msg) {
         rotateFile();
         return m_file << msg << m_line_end << std::endl;
     }
@@ -128,9 +141,14 @@ namespace CzaraEngine {
         const_cast<SizeLogFile*>(this)->m_increment++;
         return m_base_directory / filename.str();
     }
-    //std::ostream& SizeLogFile::operator<<(std::ostream &msg) {
     std::ostream& SizeLogFile::write(const char * msg) {
         m_input_buffer = std::strlen(msg);
+        rotateFile();
+        m_file << msg << std::endl;
+        return m_file;
+    }
+    std::ostream& SizeLogFile::write(const std::string &msg) {
+        m_input_buffer = msg.size();
         rotateFile();
         m_file << msg << std::endl;
         return m_file;
@@ -151,21 +169,7 @@ namespace CzaraEngine {
         }
         return false;
     }
-    // std::ostream& operator<<(LogFile &log_file, const std::string &msg) {
-    //     return log_file << msg;
-    // }
-    // std::ostream& operator<<(LogFile &log_file, const char msg[]) {
-    //     std::cout << "Debug ...\n";
-    //     return log_file.m_file << msg << std::endl; // Crashing here likely.
-    // }
-    std::ostream& operator<<(LogFile &log_file, const char* msg) {
-        std::cout << "Helloooos\n";
-        return log_file.write(msg);
-    }
-    std::ostream& operator<<(LogFile &log_file, std::ostream &stream) {
-        std::cout << "Helloooos\n";
-        return log_file.write(stream);
-    }
+
     std::ostringstream LogFile::getClassDetails() const {
         std::ostringstream stream;
         std::string open_status = (isOpen()) ? "OPEN" : "CLOSE";
@@ -181,10 +185,5 @@ namespace CzaraEngine {
         return stream;
     }
 
-    std::ostream& operator<<(std::ostream &stream, const LogFile& log_file) {
-        std::ostringstream output_stream = log_file.getClassDetails();
-        stream << output_stream.str();
-        return stream;
-    }
     // End of LogFile
 }

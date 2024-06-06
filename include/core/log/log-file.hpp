@@ -1,9 +1,9 @@
 #pragma once
+#include "log.hpp"
+
 #include "inttypes.hpp"
-#include "shared.hpp"
+
 #include <string>
-#include <map>
-#include <vector>
 #include <fstream>
 #include <chrono>
 #include <filesystem>
@@ -15,22 +15,23 @@ namespace chrono_lit = std::chrono_literals;
 using namespace chrono_lit;
 
 namespace CzaraEngine {
-
     struct LogFileProps {
         ui64 amount;
         std::string base_name;
         std::string base_directory;
     };
 
-    class LogFile {
+    class LogFile : public Log {
         public:
             virtual ~LogFile();
             virtual bool isOpen() const;
             virtual bool close();
+            static std::string endLine();
             friend bool open(const LogFile &log_file);
 
-            std::ostringstream getClassDetails() const;
+            virtual std::ostringstream getClassDetails() const;
             virtual std::ostream& write(const char*) = 0;
+            virtual std::ostream& write(const std::string &) = 0;
             virtual std::ostream& write(std::ostream &) = 0;
 
         protected:
@@ -48,17 +49,14 @@ namespace CzaraEngine {
             virtual bool hasExceededAmount() const = 0;
             virtual fs::path generateFileName() const = 0;
     };
-    std::ostream& operator<<(LogFile &log_file, const char* msg);
-    std::ostream& operator<<(LogFile &log_file, std::ostream &msg);
-    std::ostream& operator<<(std::ostream &stream, const LogFile &log_file);
 
     class TimeLogFile : public LogFile {
         public:
             TimeLogFile(const LogFileProps &log_file_props);
             virtual ~TimeLogFile();
             virtual std::ostream& write(const char* msg);
+            virtual std::ostream& write(const std::string &msg);
             virtual std::ostream& write(std::ostream &msg);
-            //virtual std::ostream& operator<<(std::ostream &msg);
         private:
             chrono::time_point<chrono::system_clock> timestamp;
             constexpr static chrono::minutes min_time_allowed_in_minutes = 10min; // 10min
@@ -73,8 +71,8 @@ namespace CzaraEngine {
             SizeLogFile(const LogFileProps &log_file_props, ui8 suffix_length);
             virtual ~SizeLogFile();
             virtual std::ostream& write(const char* msg);
+            virtual std::ostream& write(const std::string &msg);
             virtual std::ostream& write(std::ostream &msg);
-            //virtual std::ostream& operator<<(std::ostream &msg);
         private:
             ui8 m_suffix_length;
             ui64 m_increment = 1;

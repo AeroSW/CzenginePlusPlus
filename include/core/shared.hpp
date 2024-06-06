@@ -1,25 +1,25 @@
 #pragma once
 #include "inttypes.hpp"
-#include "log-file.hpp"
 #include "counter.hpp"
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <ostream>
+#include <memory>
 
 namespace CzaraEngine {
-    class LogFile;
-    std::ostream& operator<<(LogFile &log, const char * msg);
     template<typename T>
     class Shared {
         public:
             Shared();
             Shared(T * ref);
+            Shared(T * ref, Counter * counter);
             Shared(const Shared<T> &shared_ref);
             Shared(Shared<T> &&shared_ref);
             ~Shared();
 
             T * get();
+            Counter * getCounterPtr();
             void set(T * ref);
 
             Shared<T>& operator=(const Shared<T> &shared_ref);
@@ -28,7 +28,14 @@ namespace CzaraEngine {
             const T * operator->();
             const T& operator*();
             const ui64 count();
-            void debug(const std::string &pre, const std::string &post, LogFile &log);
+            std::ostream debug(const std::string &pre, const std::string &post);
+            template<typename U>
+            friend Shared<U> static_pointer_cast(Shared<T> derived) {
+                derived.invalidStateCheck();
+                U * log = (U*) derived.get();
+                Shared<U> parent(log, derived.getCounterPtr());
+                return parent;
+            }
         private:
             Counter * counter;
             T * reference;
@@ -50,6 +57,18 @@ namespace CzaraEngine {
             counter = new Counter(1);
         }
         reference = ref;
+    }
+    template<typename T>
+    Shared<T>::Shared(T * ref, Counter * counter) {
+        if (counter == nullptr) {
+            throw "Counter cannot be null in Shared<T>";
+        }
+        if (ref == nullptr && counter->value() > 0) {
+            throw "Counter state exception.";
+        }
+        this->reference = ref;
+        this->counter = counter;
+        this->counter->postInc();
     }
 
     template<typename T>
@@ -82,6 +101,10 @@ namespace CzaraEngine {
         return this->reference;
     }
     template<typename T>
+    Counter * Shared<T>::getCounterPtr() {
+        return this->counter;
+    }
+    template<typename T>
     void Shared<T>::set(T * ref) {
         if (reference != nullptr) {
             deref();
@@ -101,6 +124,7 @@ namespace CzaraEngine {
         this->counter = shared_ref.counter; // Repoint to shared_ref's counter.
         this->reference = shared_ref.reference; // Repoint to shared_ref's reference.
         this->counter->postInc(); // Increment, since, we now have a new reference to shared_ref's reference.
+        return *this;
     }
 
     template<typename T>
@@ -110,6 +134,7 @@ namespace CzaraEngine {
         this->counter = dying_ref.counter; // Repoint to shared_ref's counter.
         this->reference = dying_ref.reference; // Repoint to shared_ref's reference.
         // No need to increment, since, dying_ref will no longer reference this instance of T.
+        return *this;
     }
 
     template<typename T>
@@ -169,10 +194,11 @@ namespace CzaraEngine {
     }
 
     template<typename T>
-    void Shared<T>::debug(const std::string &pre, const std::string &post, LogFile &log) {
+    std::ostream Shared<T>::debug(const std::string &pre, const std::string &post) {
         std::string active_count = (counter != nullptr) ? std::to_string(counter->value()) : "nullptr";
         std::string ref_value = (reference != nullptr) ? std::to_string(reference) : "nullptr";
-        log << " Ref: " << ref_value << " Count: " << active_count << " | " << pre << " Shared<T> " << post;
+        std::ostream output_stream;
+        return output_stream << " Ref: " << ref_value << " Count: " << active_count << " | " << pre << " Shared<T> " << post;
     }
     // end Shared<T>
 }
