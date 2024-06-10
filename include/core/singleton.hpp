@@ -47,7 +47,7 @@ namespace CzaraEngine {
 
     template<typename T>
     bool Singleton<T>::hasReference() {
-        return m_reference == nullptr;
+        return m_reference != nullptr;
     }
     template<typename T>
     T& Singleton<T>::getReference() {

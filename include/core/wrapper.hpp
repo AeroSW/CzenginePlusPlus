@@ -30,6 +30,9 @@ namespace CzaraEngine {
     }
     template<typename T>
     T* Wrapper<T>::get() const {
+        if (m_instance == nullptr) {
+            THROW_EXCEPTION(EngineExceptionCode::MEMORY_EXCEPTION, "Wrapper instance is null when it shouldn't be.");
+        }
         return m_instance;
     }
 }

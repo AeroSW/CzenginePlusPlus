@@ -30,10 +30,18 @@ namespace CzaraEngine {
             const ui64 count();
             std::ostream debug(const std::string &pre, const std::string &post);
             template<typename U>
-            friend Shared<U> static_pointer_cast(Shared<T> derived) {
+            friend Shared<U> static_pointer_cast(Shared<T> &derived) {
                 derived.invalidStateCheck();
-                U * log = (U*) derived.get();
+                U * log = static_cast<U*>(derived.get());
                 Shared<U> parent(log, derived.getCounterPtr());
+                return parent;
+            }
+            template<typename U>
+            friend Shared<U> static_pointer_cast(const Shared<T> &derived) {
+                derived.invalidStateCheck();
+                Shared<T> casted_copy = const_cast<Shared<T>&>(derived);
+                U * log = dynamic_cast<U*>(casted_copy.get());
+                Shared<U> parent(log, casted_copy.getCounterPtr());
                 return parent;
             }
         private:
