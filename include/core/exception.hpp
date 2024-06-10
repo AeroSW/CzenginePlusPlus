@@ -16,9 +16,13 @@ namespace CzaraEngine {
     };
     const std::string err_log_name = "err_log";
     
+    void exceptionWrap(void (*func)());
+    template<typename... A>
+    void exceptionWrapVoid(void (*func)(A...), A... args);
     template<typename T, typename... A>
-    T exceptionWrap(T (*func)(A...), A... args);
+    T exceptionWrapReturn(T (*func)(A...), A... args);
 
+    void handleException(EngineException&);
     void setupErrLog();
     
     #ifndef THROW_EXCEPTION
@@ -26,6 +30,7 @@ namespace CzaraEngine {
         #define THROW_EXCEPTION(err_code, msg) \
             std::ostringstream oss; \
             oss << __FILE__ << "::" << __LINE__ << msg; \
-            EngineException exc = {err_code, oss.str()};
+            EngineException exc = {err_code, oss.str()}; \
+            throw exc;
     #endif
 }

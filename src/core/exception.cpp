@@ -6,11 +6,50 @@
 #include "app-configuration.hpp"
 
 namespace CzaraEngine {
+    template<typename T, typename U>
+    Shared<U> static_pointer_cast(Shared<T> &derived);
+    template<typename T, typename U>
+    Shared<U> static_pointer_cast(const Shared<T> &derived);
+
+    //BEGIN Exception Wrappers
+    void exceptionWrap(void (*func)()) {
+        try {
+            func();
+        } catch (EngineException &engine_exception) {
+            handleException(engine_exception);
+        } catch (...) {
+            setupErrLog();
+            LogManager log_manager;
+            log_manager.writeToLog(err_log_name, "An unknown exception occurred.");
+        }
+    }
+    template<typename... A>
+    void exceptionWrapVoid(void (*func)(A...), A... args) {
+        try {
+            func(args...);
+        } catch (EngineException &engine_exception) {
+            handleException(engine_exception);
+        } catch (...) {
+            setupErrLog();
+            LogManager log_manager;
+            log_manager.writeToLog(err_log_name, "An unknown exception occurred.");
+        }
+    }
     template<typename T, typename... A>
-    T exceptionWrap(T (*func)(A...), A... args) {
+    T exceptionWrapReturn(T (*func)(A...), A... args) {
         try {
             return func(args...);
         } catch (EngineException &engine_exception) {
+            handleException(engine_exception);
+        } catch (...) {
+            setupErrLog();
+            LogManager log_manager;
+            log_manager.writeToLog(err_log_name, "An unknown exception occurred.");
+        }
+    }
+    //END Exception Wrappers
+
+    void handleException(EngineException &engine_exception) {
             setupErrLog();
             LogManager log_manager;
             std::ostringstream stream;
@@ -26,11 +65,6 @@ namespace CzaraEngine {
                     break;
             };
             log_manager.writeToLog(err_log_name, stream.str());
-        } catch (...) {
-            setupErrLog();
-            LogManager log_manager;
-            log_manager.writeToLog(err_log_name, "An unknown exception occurred.");
-        }
     }
 
     void setupErrLog() {
