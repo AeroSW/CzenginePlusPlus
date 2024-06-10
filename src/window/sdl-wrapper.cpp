@@ -35,7 +35,7 @@ namespace CzaraEngine {
         Wrapper<SDL_Renderer>(std::bind_front(SdlRendererWrapper::destroyRenderer, this)), sdl_window_wrapper(window_wrapper) {
         
         m_instance = SDL_CreateRenderer(sdl_window_wrapper->get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
-        if (m_instance == nullptr) {
+        if (!m_instance) {
             THROW_EXCEPTION(EngineExceptionCode::WINDOW_EXCEPTION, SDL_GetError());
         }
     }

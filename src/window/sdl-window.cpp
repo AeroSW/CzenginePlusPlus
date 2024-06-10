@@ -1,47 +1,55 @@
 #include "inttypes.hpp"
 #include "sdl-window.hpp"
 #include <iostream>
+#include <thread>
 #include <memory>
 #include <string>
 #include <functional>
 
 namespace CzaraEngine {
     
-    SdlWindow::SdlWindow(const WindowProperties &properties, const std::stop_token &stop_token) :
-        Window(properties), sustain(false), sdl_window(new SdlWindowWrapper(properties)), 
-        sdl_window_surface(new SdlSurfaceWrapper(sdl_window)), m_stop_token(stop_token) {
+    SdlWindow::SdlWindow(const WindowProperties &properties) :
+        Window(properties), sustain(false), m_sdl_window(new SdlWindowWrapper(properties)), 
+        m_sdl_renderer(new SdlRendererWrapper(m_sdl_window)),
+        m_interface(new DearImGuiInterface(m_sdl_window, m_sdl_renderer)) {
+        
         sustainEventLoop();
     }
 
     SdlWindow::SdlWindow(const SdlWindow &window) : Window(window), sustain(window.sustain),
-        sdl_window(window.sdl_window), sdl_window_surface(window.sdl_window_surface), m_stop_token(window.m_stop_token) {
+        m_sdl_window(window.m_sdl_window), m_sdl_renderer(window.m_sdl_renderer), m_interface(window.m_interface) {
 
-        if (sdl_window.isNullptr()) {
+        if (m_sdl_window.isNullptr()) {
             throw "SDL Window Creation Failed";
         }
-        if (sdl_window_surface.isNullptr()) {
-            throw "SDL Window Surface Creation Failed";
+        if (m_sdl_renderer.isNullptr()) {
+            throw "SDL Renderer Creation Failed";
         }
+        
+        sustainEventLoop();
     }
 
     SdlWindow::SdlWindow(SdlWindow * window) : Window(*window), sustain(window->sustain),
-        sdl_window(window->sdl_window), sdl_window_surface(window->sdl_window_surface), m_stop_token(window->m_stop_token) {
+        m_sdl_window(window->m_sdl_window), m_sdl_renderer(window->m_sdl_renderer),
+        m_interface(window->m_interface) {
         
         std::cout << "SdlWindow::SdlWindow(WindowProperties *)\n";
-        if (sdl_window.isNullptr()) {
+        if (m_sdl_window.isNullptr()) {
             throw "SDL Window Creation Failed";
         }
-        if (sdl_window_surface.isNullptr()) {
-            throw "SDL Window Surface Creation Failed";
+        if (m_sdl_renderer.isNullptr()) {
+            throw "SDL Renderer Creation Failed";
         }
+        
+        sustainEventLoop();
     }
 
     SdlWindow::~SdlWindow() {
-        std::cout << "SDL Destructor\n";
+        SDL_Quit();
     }
     bool SdlWindow::addChild(const WindowProperties &properties) {
         try {
-            this->children.push_back(Shared<Window>(new SdlWindow(properties, m_stop_token)));
+            this->children.push_back(Shared<Window>(new SdlWindow(properties)));
         } catch(ui8 errCode) {
             // ToDo: Implement logging for error
             std::cerr << "Error Code, " << errCode << ", was intercepted.\n";
@@ -52,28 +60,44 @@ namespace CzaraEngine {
 
     void SdlWindow::sustainEventLoop() {
         sustain = true;
-        std::cout << "Sustain: " << sustain << std::endl;
-        while(sustain && !(m_stop_token.stop_requested())) {
+        while(isOpen()) {
+            SDL_SetRenderDrawColor(m_sdl_renderer->get(), 100, 100, 100, 255);
             SDL_Event sdl_event;
-            while(SDL_PollEvent(&sdl_event) > 0 && sustain) {
-                std::cout << "Event detected!\n";
+            while(SDL_PollEvent(&sdl_event) > 0) {
+                m_interface.get()->processEvent(sdl_event);
                 switch (sdl_event.type) {
                     case SDL_WINDOWEVENT:
-                        std::cout << "Window event detected!\n";
                         switch(sdl_event.window.event) {
                             case SDL_WINDOWEVENT_CLOSE:
-                                std::cout << "Close event detected!\n";
                                 sustain = false;
                                 break;
                         }
                 }
-                if(sustain) SDL_UpdateWindowSurface(sdl_window->get());
             }
+            m_interface.get()->newFrame();
+            m_interface.get()->render();
+            SDL_RenderClear(m_sdl_renderer->get());
+            m_interface.get()->draw();
+            SDL_RenderPresent(m_sdl_renderer->get());
         }
     }
 
     bool SdlWindow::isOpen() {
-        return sustain && !m_stop_token.stop_requested();
+        return sustain;
+    }
+
+    void SdlWindow::addComponent(Shared<SdlComponent> &sdl_component) {
+        m_components.push_back(sdl_component);
+    }
+    Shared<SdlWindowWrapper>& SdlWindow::getWindowWrapper() {
+        return m_sdl_window;
+    }
+    Shared<SdlRendererWrapper>& SdlWindow::getRendererWrapper() {
+        return m_sdl_renderer;
+    }
+
+    void SdlWindow::setInterface(Shared<DearImGuiInterface> &interface) {
+        m_interface = interface;
     }
 
     ui32 SdlWindow::X_CENTER = SDL_WINDOWPOS_CENTERED;

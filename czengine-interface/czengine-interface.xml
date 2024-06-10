@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MainMenuBar>
+    <Menu name="File">
+        <Actions>
+            <Action name="New" />
+            <Action name="Open" />
+            <Action name="Save" />
+            <Action name="Close" />
+            <Action name="Separator" />
+            <Action name="Properties" />
+            <Action name="Separator" />
+            <Action name="Exit" />
+        </Actions>
+    </Menu>
+</MainMenuBar>

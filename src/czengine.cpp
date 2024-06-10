@@ -4,26 +4,30 @@
 #include "window.hpp"
 #include "sdl-window.hpp"
 #include "log-file.hpp"
+#include "exception.hpp"
 #include "app-configuration.hpp"
+#include <iostream>
 
 #include <thread>
 
 namespace fs = std::filesystem;
 using namespace CzaraEngine;
 
-void buildWindow(std::stop_token stop_token) {
+Singleton<SdlWindow> window = Singleton<SdlWindow>::getSingletonInstance();
+
+void buildWindow() {
     WindowProperties props;
     props.height = 720;
     props.width = 1080;
     props.x_window_offset = SdlWindow::X_CENTER;
     props.y_window_offset = SdlWindow::Y_CENTER;
     props.name = "AeroCzengine";
-    Shared<Window> window{new SdlWindow(props, stop_token)};
+    if (!window.hasReference()) {
+        window.initReference<WindowProperties>(props);
+    }
 }
 
 int main() {
-    std::cout << "Welcome to the Czengine Project\n";
-    //Shared<Window> window;
     if(!app_config.initReference<AppState>(AppState::__DEBUG__)) {
         std::cerr << "Issue initializing Application Configuration." << std::endl;
         return 1;
@@ -38,11 +42,7 @@ int main() {
     open(*application_log);
     (*(application_log.get())) << "Test Log 1";
     try {
-        std::jthread t{&buildWindow};
-        char ii;
-        std::cout << "Enter a value: ";
-        std::cin >> ii;
-        t.request_stop();
+        exceptionWrap(buildWindow);
     } catch (std::string err_msg) {
         std::cout << err_msg << std::endl;
     } catch(...) {
