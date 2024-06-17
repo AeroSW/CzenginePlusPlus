@@ -21,9 +21,9 @@ namespace CzaraEngine {
         Window(properties), sustain(false), m_sdl_window(new SdlWindowWrapper(properties)), 
         m_sdl_renderer(new SdlRendererWrapper(m_sdl_window)),
         m_interface(new DearImGuiInterface(m_sdl_window, m_sdl_renderer)) {
-        //std::jthread jay(std::bind_front(SdlWindow::processInterface, this));
-        std::stop_token token;
-        processInterface(token);
+        std::jthread jay(std::bind_front(SdlWindow::processInterface, this));
+        //std::stop_token token;
+        //processInterface(token);
         sustainEventLoop();
     }
 
