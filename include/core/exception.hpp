@@ -8,7 +8,8 @@ namespace CzaraEngine {
     enum class EngineExceptionCode {
         LOG_EXCEPTION,
         WINDOW_EXCEPTION,
-        MEMORY_EXCEPTION
+        MEMORY_EXCEPTION,
+        FILE_EXCEPTION
     };
     struct EngineException {
         EngineExceptionCode exception_code;

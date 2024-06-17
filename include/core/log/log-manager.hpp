@@ -15,6 +15,6 @@ namespace CzaraEngine{
             virtual bool hasLog(const std::string &log_name) const;
         private:
             inline static const std::string m_personal = "LogManager_personal";
-            static std::map<std::string, Shared<Log>> logs;
+            static std::map<std::string, Shared<Log>>& getLogMap();
     };
 }

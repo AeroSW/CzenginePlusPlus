@@ -26,7 +26,6 @@ namespace CzaraEngine {
             Shared<T>& operator=(Shared<T> &&shared_ref);
             bool isNullptr();
             const T * operator->();
-            const T& operator*();
             const ui64 count();
             std::ostream debug(const std::string &pre, const std::string &post);
             template<typename U>
@@ -131,7 +130,9 @@ namespace CzaraEngine {
         deref();
         this->counter = shared_ref.counter; // Repoint to shared_ref's counter.
         this->reference = shared_ref.reference; // Repoint to shared_ref's reference.
-        this->counter->postInc(); // Increment, since, we now have a new reference to shared_ref's reference.
+        if (this->reference != nullptr) {
+            this->counter->postInc(); // Increment, since, we now have a new reference to shared_ref's reference.
+        }
         return *this;
     }
 
@@ -156,14 +157,6 @@ namespace CzaraEngine {
             throw "Unable to access members of nullptr.";
         }
         return this->reference;
-    }
-
-    template<typename T>
-    const T& Shared<T>::operator*() {
-        if (reference == nullptr) {
-            throw "Unable to dereference a nullptr.";
-        }
-        return *this->reference;
     }
 
     template<typename T>
