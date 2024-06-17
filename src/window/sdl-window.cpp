@@ -1,24 +1,36 @@
+#include "app-configuration.hpp"
 #include "inttypes.hpp"
 #include "sdl-window.hpp"
+#include "czengine-ux-file.hpp"
+#include "event-queue.hpp"
+
 #include <iostream>
 #include <thread>
 #include <memory>
 #include <string>
 #include <functional>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace CzaraEngine {
+    ui32 SdlWindow::X_CENTER = SDL_WINDOWPOS_CENTERED;
+    ui32 SdlWindow::Y_CENTER = SDL_WINDOWPOS_CENTERED;
     
     SdlWindow::SdlWindow(const WindowProperties &properties) :
         Window(properties), sustain(false), m_sdl_window(new SdlWindowWrapper(properties)), 
         m_sdl_renderer(new SdlRendererWrapper(m_sdl_window)),
         m_interface(new DearImGuiInterface(m_sdl_window, m_sdl_renderer)) {
-        
+        //std::jthread jay(std::bind_front(SdlWindow::processInterface, this));
+        std::stop_token token;
+        processInterface(token);
         sustainEventLoop();
     }
 
     SdlWindow::SdlWindow(const SdlWindow &window) : Window(window), sustain(window.sustain),
-        m_sdl_window(window.m_sdl_window), m_sdl_renderer(window.m_sdl_renderer), m_interface(window.m_interface) {
-
+        m_sdl_window(window.m_sdl_window), m_sdl_renderer(window.m_sdl_renderer), 
+        m_interface(window.m_interface) {
+        
         if (m_sdl_window.isNullptr()) {
             throw "SDL Window Creation Failed";
         }
@@ -33,7 +45,6 @@ namespace CzaraEngine {
         m_sdl_window(window->m_sdl_window), m_sdl_renderer(window->m_sdl_renderer),
         m_interface(window->m_interface) {
         
-        std::cout << "SdlWindow::SdlWindow(WindowProperties *)\n";
         if (m_sdl_window.isNullptr()) {
             throw "SDL Window Creation Failed";
         }
@@ -47,6 +58,7 @@ namespace CzaraEngine {
     SdlWindow::~SdlWindow() {
         SDL_Quit();
     }
+
     bool SdlWindow::addChild(const WindowProperties &properties) {
         try {
             this->children.push_back(Shared<Window>(new SdlWindow(properties)));
@@ -74,7 +86,29 @@ namespace CzaraEngine {
                         }
                 }
             }
+            while (!EventDataQueue::empty()) {
+                EventDataObject edo = EventDataQueue::peekType();
+                switch (edo) {
+                    case EventDataObject::COMPONENT: { // this ("{}" inside a case) is a stupid new feature of C++.
+                        Shared<Component> component = EventDataQueue::dequeue<Component>();
+                        if (!component.isNullptr()) {
+                            m_interface.get()->addComponent(component);
+                        }
+                        break;
+                    } case EventDataObject::COMPONENT_COLLECTION: {
+                        Shared<std::vector<Shared<Component>>> components = EventDataQueue::dequeue<std::vector<Shared<Component>>>();
+                        if (!components.isNullptr()) {
+                            m_interface.get()->addComponents(*(components.get()));
+                        }
+                        break;
+                    } case EventDataObject::STRING: {
+                        //Shared<std::string> component = EventDataQueue::dequeue<std::string>();
+                        break;
+                    }
+                };
+            }
             m_interface.get()->newFrame();
+            m_interface.get()->drawInterface();
             m_interface.get()->render();
             SDL_RenderClear(m_sdl_renderer->get());
             m_interface.get()->draw();
@@ -86,9 +120,6 @@ namespace CzaraEngine {
         return sustain;
     }
 
-    void SdlWindow::addComponent(Shared<SdlComponent> &sdl_component) {
-        m_components.push_back(sdl_component);
-    }
     Shared<SdlWindowWrapper>& SdlWindow::getWindowWrapper() {
         return m_sdl_window;
     }
@@ -100,6 +131,12 @@ namespace CzaraEngine {
         m_interface = interface;
     }
 
-    ui32 SdlWindow::X_CENTER = SDL_WINDOWPOS_CENTERED;
-    ui32 SdlWindow::Y_CENTER = SDL_WINDOWPOS_CENTERED;
+    void SdlWindow::processInterface(const std::stop_token &token) {
+        fs::path interface_file{app_config.getReference().default_interface_file};
+        CzengineUxFile ux_file_processor{interface_file};
+        Shared<void> void_ref {new std::vector<Shared<Component>>(ux_file_processor.processFile())};
+        EventDataObject edo = EventDataObject::COMPONENT_COLLECTION;
+        EventDataQueue::enqueue(edo, void_ref);
+    }
+
 }
