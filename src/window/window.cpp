@@ -13,7 +13,6 @@ namespace CzaraEngine {
         }
 
     Window::~Window() {
-        std::cout << "Window Destructor\n";
         clearChildrenVector();
     }
 
