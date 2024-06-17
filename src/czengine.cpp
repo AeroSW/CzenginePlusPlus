@@ -1,11 +1,11 @@
 #include <memory>
 #include <filesystem>
 #include <fstream>
-#include "window.hpp"
 #include "sdl-window.hpp"
 #include "log-file.hpp"
 #include "exception.hpp"
 #include "app-configuration.hpp"
+#include "czengine-ux-file.hpp"
 #include <iostream>
 
 #include <thread>
@@ -39,7 +39,7 @@ int main() {
     app_log_props.base_name = "application";
     
     Shared<LogFile> application_log{new TimeLogFile(app_log_props)};
-    open(*application_log);
+    open(*application_log.get());
     (*(application_log.get())) << "Test Log 1";
     try {
         exceptionWrap(buildWindow);
@@ -48,6 +48,6 @@ int main() {
     } catch(...) {
         std::cout << "Caught the error somehow.\n";
     }
-    std::cout << (*application_log) << std::endl;
+    std::cout << (*application_log.get()) << std::endl;
     return 0;
 }
