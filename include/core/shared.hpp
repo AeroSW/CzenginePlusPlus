@@ -142,6 +142,9 @@ namespace CzaraEngine {
         deref();
         this->counter = dying_ref.counter; // Repoint to shared_ref's counter.
         this->reference = dying_ref.reference; // Repoint to shared_ref's reference.
+        if (this->reference != nullptr) {
+            this->counter->postInc(); // Increment, since, we now have a new reference to shared_ref's reference.
+        }
         // No need to increment, since, dying_ref will no longer reference this instance of T.
         return *this;
     }

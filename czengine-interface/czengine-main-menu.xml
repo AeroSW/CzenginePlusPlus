@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Content>
+    <MainMenuBar>
+        <Menu name="File">
+            <MenuItem name="New" />
+            <MenuItem name="Open" />
+            <MenuItem name="Save" />
+            <MenuItem name="Close" />
+            <Separator />
+            <MenuItem name="Project Properties" />
+            <Separator />
+            <MenuItem name="Editor Properties" />
+            <MenuItem name="Exit" />
+        </Menu>
+    </MainMenuBar>
+</Content>

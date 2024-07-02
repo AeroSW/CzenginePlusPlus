@@ -128,6 +128,7 @@ namespace CzaraEngine {
             throw "File closure failed.  Terminating engine.";
         }
         m_file.open(filename);
+        m_active_file = filename;
         return m_file.is_open();
     }
     bool SizeLogFile::hasExceededAmount() const {

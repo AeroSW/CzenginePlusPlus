@@ -38,6 +38,13 @@ namespace CzaraEngine {
         if (!m_instance) {
             THROW_EXCEPTION(EngineExceptionCode::WINDOW_EXCEPTION, SDL_GetError());
         }
+        i32 w, h = 0;
+        i32 r_w, r_h = 0;
+        SDL_GetWindowSize(sdl_window_wrapper.get()->get(), &w, &h);
+        SDL_GetRendererOutputSize(m_instance, &r_w, &r_h);
+        float scaled_w = static_cast<float>(r_w) / static_cast<float>(w);
+        float scaled_h = static_cast<float>(r_h) / static_cast<float>(h);
+        SDL_RenderSetScale(m_instance, scaled_w, scaled_h);
     }
     SdlRendererWrapper::~SdlRendererWrapper() {}
     void SdlRendererWrapper::destroyRenderer(SDL_Renderer * renderer) {

@@ -2,6 +2,7 @@
 
 #include "shared.hpp"
 #include <vector>
+#include <map>
 
 namespace CzaraEngine {
     

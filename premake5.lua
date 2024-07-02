@@ -94,7 +94,14 @@ project "CzenginePlusPlus"
     system "Windows"
     architecture "x86_64"
     local lib_list = {}
-    local include_list = { "./include/**", "./extern/DearImGui/include", "./extern/DearImGui/include/**", "./extern/PugiXml/include" }
+    local include_list = { 
+        "./include/**",
+        "./extern/DearImGui/include",
+        "./extern/DearImGui/include/**",
+        "./extern/PugiXml/include",
+        "./extern/toml++/include",
+        "./extern/toml++/include/**"
+    }
     local link_list = {}
 
     -- Add external libraries...  TODO: Adjust to list and for-loop

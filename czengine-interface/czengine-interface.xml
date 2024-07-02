@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MainMenuBar>
-    <Menu name="File">
-        <MenuItem name="New" />
-        <MenuItem name="Open" />
-        <MenuItem name="Save" />
-        <MenuItem name="Close" />
-        <Separator name="Separator" />
-        <MenuItem name="Properties" />
-        <Separator />
-        <MenuItem name="Exit" />
-    </Menu>
-</MainMenuBar>
+<Content>
+    <File name="./czengine-interface/czengine-main-menu.xml" />
+    <File name="./czengine-interface/czengine-body-layout.xml" />
+</Content>

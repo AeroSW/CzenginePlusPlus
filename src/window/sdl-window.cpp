@@ -1,8 +1,10 @@
 #include "app-configuration.hpp"
 #include "inttypes.hpp"
 #include "sdl-window.hpp"
-#include "czengine-ux-file.hpp"
+#include "czengine-ux-file-parser.hpp"
 #include "event-queue.hpp"
+
+#include "imgui.h"
 
 #include <iostream>
 #include <thread>
@@ -22,8 +24,6 @@ namespace CzaraEngine {
         m_sdl_renderer(new SdlRendererWrapper(m_sdl_window)),
         m_interface(new DearImGuiInterface(m_sdl_window, m_sdl_renderer)) {
         std::jthread jay(std::bind_front(SdlWindow::processInterface, this));
-        //std::stop_token token;
-        //processInterface(token);
         sustainEventLoop();
     }
 
@@ -109,6 +109,12 @@ namespace CzaraEngine {
             }
             m_interface.get()->newFrame();
             m_interface.get()->drawInterface();
+
+            // ImGui::DockSpaceOverViewport();
+            // ImGui::Begin("Init Panel");
+            // ImGui::Text("Panel Content");
+            // ImGui::End();
+
             m_interface.get()->render();
             SDL_RenderClear(m_sdl_renderer->get());
             m_interface.get()->draw();
@@ -133,7 +139,7 @@ namespace CzaraEngine {
 
     void SdlWindow::processInterface(const std::stop_token &token) {
         fs::path interface_file{app_config.getReference().default_interface_file};
-        CzengineUxFile ux_file_processor{interface_file};
+        CzengineUxFileParser ux_file_processor{interface_file};
         Shared<void> void_ref {new std::vector<Shared<Component>>(ux_file_processor.processFile())};
         EventDataObject edo = EventDataObject::COMPONENT_COLLECTION;
         EventDataQueue::enqueue(edo, void_ref);
