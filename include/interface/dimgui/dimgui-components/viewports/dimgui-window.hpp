@@ -4,6 +4,8 @@
 #include "component.hpp"
 #include "xml-interface-binding-macro.hpp"
 
+#include <ostream>
+
 namespace CzaraEngine {
     struct PanelProps {
         std::string id;
@@ -11,7 +13,7 @@ namespace CzaraEngine {
         bool no_resize = false;
         bool no_move = false;
         bool no_vertical_scrollbar = false;
-        bool no_horizontal_scrollbar = true;
+        bool horizontal_scrollbar = false;
         bool no_mouse_scroll = false;
         bool no_collapse = false;
         bool no_background = false;
@@ -23,6 +25,9 @@ namespace CzaraEngine {
         bool no_decoration = false;
         bool no_inputs = false;
     };
+
+    std::ostream& operator<<(std::ostream& stream, const PanelProps& props);
+    std::ostream& operator<<(std::ostream& stream, PanelProps& props);
     
     class Panel : public Component {
         public:
@@ -34,6 +39,7 @@ namespace CzaraEngine {
             static inline bool openClosablePanel(Component *);
             static inline bool closeClosablePanel(Component *);
             static inline bool toggleClosablePanel(Component *);
+            friend std::ostream& operator<<(std::ostream& stream, Panel& panel);
 
         protected:
             virtual void beginComponent();

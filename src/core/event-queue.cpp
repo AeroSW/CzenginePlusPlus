@@ -4,7 +4,7 @@
 
 namespace CzaraEngine {
 
-    void EventDataQueue::enqueue(EventDataObject &type, Shared<void> &obj) {
+    void EventDataQueue::enqueue(EventDataObject &type, std::shared_ptr<void> &obj) {
         std::lock_guard<std::mutex> guard(getMutex());
         QueueObject queue_obj {type, obj};
         getQueue().push(queue_obj);

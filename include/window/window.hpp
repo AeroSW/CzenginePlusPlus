@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "inttypes.hpp"
-#include "shared.hpp"
+#include <memory>
 
 namespace CzaraEngine {
     struct WindowProperties {
@@ -30,7 +30,7 @@ namespace CzaraEngine {
             ui32 x_window_offset;
             ui32 y_window_offset;
             std::string name;
-            std::vector<Shared<Window>> children;
+            std::vector<std::shared_ptr<Window>> children;
 
             Window();
             Window(const WindowProperties& properties);

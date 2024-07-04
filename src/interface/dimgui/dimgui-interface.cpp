@@ -3,7 +3,7 @@
 
 namespace CzaraEngine {
     
-    DearImGuiInterface::DearImGuiInterface(Shared<SdlWindowWrapper> &window, Shared<SdlRendererWrapper> &renderer) :
+    DearImGuiInterface::DearImGuiInterface(std::shared_ptr<SdlWindowWrapper> &window, std::shared_ptr<SdlRendererWrapper> &renderer) :
     Interface(), m_sdl_initialized(false), m_window(window), m_renderer(renderer) {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -18,10 +18,10 @@ namespace CzaraEngine {
         ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext();
     }
-    void DearImGuiInterface::addComponent(Shared<Component> &component) {
+    void DearImGuiInterface::addComponent(std::shared_ptr<Component> &component) {
         m_components.push_back(component);
     }
-    void DearImGuiInterface::addComponents(std::vector<Shared<Component>> &components) {
+    void DearImGuiInterface::addComponents(std::vector<std::shared_ptr<Component>> &components) {
         m_components.insert(m_components.end(), components.begin(), components.end());
     }
     void DearImGuiInterface::newFrame() {
@@ -42,7 +42,7 @@ namespace CzaraEngine {
         );
     }
     void DearImGuiInterface::drawInterface() {
-        for (Shared<Component> component : m_components) {
+        for (std::shared_ptr<Component> component : m_components) {
             component.get()->renderComponent();
         }
     }

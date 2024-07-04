@@ -31,10 +31,10 @@ namespace CzaraEngine {
         m_sdl_window(window.m_sdl_window), m_sdl_renderer(window.m_sdl_renderer), 
         m_interface(window.m_interface) {
         
-        if (m_sdl_window.isNullptr()) {
+        if (!m_sdl_window) {
             throw "SDL Window Creation Failed";
         }
-        if (m_sdl_renderer.isNullptr()) {
+        if (!m_sdl_renderer) {
             throw "SDL Renderer Creation Failed";
         }
         
@@ -45,10 +45,10 @@ namespace CzaraEngine {
         m_sdl_window(window->m_sdl_window), m_sdl_renderer(window->m_sdl_renderer),
         m_interface(window->m_interface) {
         
-        if (m_sdl_window.isNullptr()) {
+        if (!m_sdl_window) {
             throw "SDL Window Creation Failed";
         }
-        if (m_sdl_renderer.isNullptr()) {
+        if (!m_sdl_renderer) {
             throw "SDL Renderer Creation Failed";
         }
         
@@ -61,7 +61,7 @@ namespace CzaraEngine {
 
     bool SdlWindow::addChild(const WindowProperties &properties) {
         try {
-            this->children.push_back(Shared<Window>(new SdlWindow(properties)));
+            this->children.push_back(std::shared_ptr<Window>(new SdlWindow(properties)));
         } catch(ui8 errCode) {
             // ToDo: Implement logging for error
             std::cerr << "Error Code, " << errCode << ", was intercepted.\n";
@@ -90,14 +90,14 @@ namespace CzaraEngine {
                 EventDataObject edo = EventDataQueue::peekType();
                 switch (edo) {
                     case EventDataObject::COMPONENT: { // this ("{}" inside a case) is a stupid new feature of C++.
-                        Shared<Component> component = EventDataQueue::dequeue<Component>();
-                        if (!component.isNullptr()) {
+                        std::shared_ptr<Component> component = EventDataQueue::dequeue<Component>();
+                        if (!!component) {
                             m_interface.get()->addComponent(component);
                         }
                         break;
                     } case EventDataObject::COMPONENT_COLLECTION: {
-                        Shared<std::vector<Shared<Component>>> components = EventDataQueue::dequeue<std::vector<Shared<Component>>>();
-                        if (!components.isNullptr()) {
+                        std::shared_ptr<std::vector<std::shared_ptr<Component>>> components = EventDataQueue::dequeue<std::vector<std::shared_ptr<Component>>>();
+                        if (!!components) {
                             m_interface.get()->addComponents(*(components.get()));
                         }
                         break;
@@ -126,21 +126,21 @@ namespace CzaraEngine {
         return sustain;
     }
 
-    Shared<SdlWindowWrapper>& SdlWindow::getWindowWrapper() {
+    std::shared_ptr<SdlWindowWrapper>& SdlWindow::getWindowWrapper() {
         return m_sdl_window;
     }
-    Shared<SdlRendererWrapper>& SdlWindow::getRendererWrapper() {
+    std::shared_ptr<SdlRendererWrapper>& SdlWindow::getRendererWrapper() {
         return m_sdl_renderer;
     }
 
-    void SdlWindow::setInterface(Shared<DearImGuiInterface> &interface) {
+    void SdlWindow::setInterface(std::shared_ptr<DearImGuiInterface> &interface) {
         m_interface = interface;
     }
 
     void SdlWindow::processInterface(const std::stop_token &token) {
         fs::path interface_file{app_config.getReference().default_interface_file};
         CzengineUxFileParser ux_file_processor{interface_file};
-        Shared<void> void_ref {new std::vector<Shared<Component>>(ux_file_processor.processFile())};
+        std::shared_ptr<void> void_ref {new std::vector<std::shared_ptr<Component>>(ux_file_processor.processFile())};
         EventDataObject edo = EventDataObject::COMPONENT_COLLECTION;
         EventDataQueue::enqueue(edo, void_ref);
     }

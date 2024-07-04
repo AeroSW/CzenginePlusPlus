@@ -21,7 +21,7 @@ namespace CzaraEngine {
     bool MainMenuParseHelper::isMainMenuTag(const std::string &tag) {
         return MAIN_MENU_TAGS.find(tag) != MAIN_MENU_TAGS.end();
     }
-    Shared<Component> MainMenuParseHelper::parseMainMenuXml(pugi::xml_node &node, const std::string &log_name) {
+    std::shared_ptr<Component> MainMenuParseHelper::parseMainMenuXml(pugi::xml_node &node, const std::string &log_name) {
         const std::string text = node.name();
         if (text == MAIN_MENU_BAR_XML) {
             return parseMainMenuBar(node);
@@ -43,16 +43,16 @@ namespace CzaraEngine {
             THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, "Main Menu XML Parsing Exception.");
         }
     }
-    Shared<Component> MainMenuParseHelper::parseMainMenuBar(pugi::xml_node &node) {
+    std::shared_ptr<Component> MainMenuParseHelper::parseMainMenuBar(pugi::xml_node &node) {
         std::string tag = node.name();
-        return Shared<Component>{XmlInterfaceBindingFactory::createComponent(tag)};
+        return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent(tag)};
 	}
-    Shared<Component> MainMenuParseHelper::parseMenu(pugi::xml_node &node) {
+    std::shared_ptr<Component> MainMenuParseHelper::parseMenu(pugi::xml_node &node) {
         std::string tag = node.name();
         std::string value = node.attribute("name").value();
-        return Shared<Component>{XmlInterfaceBindingFactory::createComponent(tag, value)};
+        return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent(tag, value)};
 	}
-    Shared<Component> MainMenuParseHelper::parseMenuItem(pugi::xml_node &node) {
+    std::shared_ptr<Component> MainMenuParseHelper::parseMenuItem(pugi::xml_node &node) {
         std::string tag = node.name();
         std::string value = node.attribute("name").value();
         std::string shortcut = node.attribute("shortcut").value();
@@ -63,24 +63,24 @@ namespace CzaraEngine {
         }
         if (callback != nullptr && shortcut.size() > 0) {
             std::string final_name = tag + "_Shortcut_Callback";
-            return Shared<Component>{XmlInterfaceBindingFactory::createComponent<std::string, std::string, std::function<void()>>(final_name, value, shortcut, callback)};
+            return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent<std::string, std::string, std::function<void()>>(final_name, value, shortcut, callback)};
         } else if (callback != nullptr) {
             std::string final_name = tag + "_Callback";
-            return Shared<Component>{XmlInterfaceBindingFactory::createComponent<std::string, std::function<void()>>(final_name, value, callback)};
+            return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent<std::string, std::function<void()>>(final_name, value, callback)};
         } else if (shortcut.size() > 0) {
             std::string final_name = tag + "_Shortcut";
-            return Shared<Component>{XmlInterfaceBindingFactory::createComponent<std::string, std::string>(final_name, value, shortcut)};
+            return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent<std::string, std::string>(final_name, value, shortcut)};
         } else {
-            return Shared<Component>{XmlInterfaceBindingFactory::createComponent<std::string>(tag, value)};
+            return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent<std::string>(tag, value)};
         }
 	}
-    Shared<Component> MainMenuParseHelper::parseMenuSeparator(pugi::xml_node &node) {
+    std::shared_ptr<Component> MainMenuParseHelper::parseMenuSeparator(pugi::xml_node &node) {
         std::string tag = node.name();
         std::string value = node.attribute("name").value();
         if (!value.empty()) {
-            return Shared<Component>{XmlInterfaceBindingFactory::createComponent(tag + "_Text", value)};
+            return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent(tag + "_Text", value)};
         } else {
-            return Shared<Component>{XmlInterfaceBindingFactory::createComponent(tag)};
+            return std::shared_ptr<Component>{XmlInterfaceBindingFactory::createComponent(tag)};
         }
 	}
 

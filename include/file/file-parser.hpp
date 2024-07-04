@@ -2,7 +2,7 @@
 
 #include <filesystem>
 #include "app-configuration.hpp"
-#include "shared.hpp"
+#include <memory>
 #include "log-file.hpp"
 #include "exception.hpp"
 #include "log-manager.hpp"
@@ -32,7 +32,7 @@ namespace CzaraEngine {
     }
     template<typename T>
     FileParser<T>::FileParser(const fs::path path) : m_path(path) {
-        Shared<SizeLogFile> log{new SizeLogFile({10000, m_log_name, app_config.getReference().default_log_dir}, 4)};
+        std::shared_ptr<SizeLogFile> log{new SizeLogFile({10000, m_log_name, app_config.getReference().default_log_dir}, 4)};
         if (!getLogManager().hasLog(m_log_name)) {
             getLogManager().registerLog(m_log_name, static_pointer_cast<Log>(log));
             open(*(log.get()));

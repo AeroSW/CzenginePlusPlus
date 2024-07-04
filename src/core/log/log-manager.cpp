@@ -5,7 +5,7 @@
 
 namespace CzaraEngine {
     
-    Log& derefSharedLog(Shared<Log> &shared_log) {
+    Log& derefSharedLog(std::shared_ptr<Log> &shared_log) {
         return (*(shared_log.get()));
     }
 
@@ -15,17 +15,17 @@ namespace CzaraEngine {
             personal_log_props.amount = 5000; // 5kB
             personal_log_props.base_directory = "logs";
             personal_log_props.base_name = m_personal + ".txt";
-            Shared<SizeLogFile> personal_log{new SizeLogFile(personal_log_props, 4)};
+            std::shared_ptr<SizeLogFile> personal_log{new SizeLogFile(personal_log_props, 4)};
             getLogMap().insert(std::make_pair(m_personal, 
                 static_pointer_cast<Log>(personal_log)));
         }
     }
     LogManager::~LogManager() {}
-    void LogManager::registerLog(const std::string &log_name, const Shared<Log> &log) {
+    void LogManager::registerLog(const std::string &log_name, const std::shared_ptr<Log> &log) {
         getLogMap().insert(std::make_pair(log_name, log));
     }
-    std::map<std::string, Shared<Log>>& LogManager::getLogMap() {
-        static std::map<std::string, Shared<Log>> m_map;
+    std::map<std::string, std::shared_ptr<Log>>& LogManager::getLogMap() {
+        static std::map<std::string, std::shared_ptr<Log>> m_map;
         return m_map;
     }
     void LogManager::writeToLog(const std::string &log_name, const std::string &msg) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared.hpp"
+#include <memory>
 #include <map>
 #include <queue>
 #include <mutex>
@@ -11,12 +11,12 @@ namespace CzaraEngine {
         COMPONENT,
         COMPONENT_COLLECTION
     };
-    typedef std::pair<EventDataObject, Shared<void>> QueueObject;
+    typedef std::pair<EventDataObject, std::shared_ptr<void>> QueueObject;
     class EventDataQueue {
         public:
-            static void enqueue(EventDataObject &type, Shared<void> &shared);
+            static void enqueue(EventDataObject &type, std::shared_ptr<void> &shared);
             template<typename T>
-            static Shared<T> dequeue();
+            static std::shared_ptr<T> dequeue();
             static EventDataObject peekType();
             static bool empty();
         private:
@@ -24,8 +24,8 @@ namespace CzaraEngine {
             static std::queue<QueueObject>& getQueue();
     };
     template<typename T>
-    Shared<T> EventDataQueue::dequeue() {
-        if (empty()) return Shared<T>();
+    std::shared_ptr<T> EventDataQueue::dequeue() {
+        if (empty()) return std::shared_ptr<T>();
         std::lock_guard<std::mutex> guard(getMutex());
         QueueObject obj = getQueue().front();
         getQueue().pop();

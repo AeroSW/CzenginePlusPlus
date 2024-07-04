@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component.hpp"
-#include "shared.hpp"
+#include <memory>
 #include "pugixml.hpp"
 
 #include <map>
@@ -12,7 +12,7 @@ namespace CzaraEngine {
             MainMenuParseHelper();
             virtual ~MainMenuParseHelper();
             virtual bool isMainMenuTag(const std::string &tag);
-            virtual Shared<Component> parseMainMenuXml(pugi::xml_node &node, const std::string &log_name);
+            virtual std::shared_ptr<Component> parseMainMenuXml(pugi::xml_node &node, const std::string &log_name);
         private:
             const static std::string MAIN_MENU_BAR_XML;
             const static std::string MENU_XML;
@@ -20,9 +20,9 @@ namespace CzaraEngine {
             const static std::string MENU_SEPARATOR_XML;
             const static std::map<std::string, std::string> MAIN_MENU_TAGS;
         private:
-            virtual Shared<Component> parseMainMenuBar(pugi::xml_node &node);
-            virtual Shared<Component> parseMenu(pugi::xml_node &node);
-            virtual Shared<Component> parseMenuItem(pugi::xml_node &node);
-            virtual Shared<Component> parseMenuSeparator(pugi::xml_node &node);
+            virtual std::shared_ptr<Component> parseMainMenuBar(pugi::xml_node &node);
+            virtual std::shared_ptr<Component> parseMenu(pugi::xml_node &node);
+            virtual std::shared_ptr<Component> parseMenuItem(pugi::xml_node &node);
+            virtual std::shared_ptr<Component> parseMenuSeparator(pugi::xml_node &node);
     };
 }

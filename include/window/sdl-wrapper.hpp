@@ -14,19 +14,19 @@ namespace CzaraEngine {
     };
     class SdlSurfaceWrapper : public Wrapper<SDL_Surface> {
         public:
-            SdlSurfaceWrapper(const Shared<SdlWindowWrapper> &swindow_wrapper);
+            SdlSurfaceWrapper(const std::shared_ptr<SdlWindowWrapper> &swindow_wrapper);
             virtual ~SdlSurfaceWrapper();
             void destroySurface(SDL_Surface *);
         private:
-            Shared<SdlWindowWrapper> sdl_window_wrapper;
+            std::shared_ptr<SdlWindowWrapper> sdl_window_wrapper;
     };
     class SdlRendererWrapper : public Wrapper<SDL_Renderer> {
         public:
-            SdlRendererWrapper(const Shared<SdlWindowWrapper> &window_wrapper);
+            SdlRendererWrapper(const std::shared_ptr<SdlWindowWrapper> &window_wrapper);
             virtual ~SdlRendererWrapper();
             void destroyRenderer(SDL_Renderer *);
         private:
-            Shared<SdlWindowWrapper> sdl_window_wrapper;
+            std::shared_ptr<SdlWindowWrapper> sdl_window_wrapper;
 
     };
 }

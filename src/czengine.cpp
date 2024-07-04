@@ -38,7 +38,7 @@ int main() {
     app_log_props.base_directory = app_config.getReference().default_log_dir;
     app_log_props.base_name = "application";
     
-    Shared<LogFile> application_log{new TimeLogFile(app_log_props)};
+    std::shared_ptr<LogFile> application_log{new TimeLogFile(app_log_props)};
     open(*application_log.get());
     (*(application_log.get())) << "Test Log 1";
     try {

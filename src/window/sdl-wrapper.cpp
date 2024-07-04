@@ -1,5 +1,6 @@
 #include "sdl-wrapper.hpp"
 #include <functional>
+#include <iostream>
 
 namespace CzaraEngine {
     SdlWindowWrapper::SdlWindowWrapper(const WindowProperties &properties) :
@@ -17,7 +18,7 @@ namespace CzaraEngine {
         SDL_DestroyWindow(m_instance);
     }
 
-    SdlSurfaceWrapper::SdlSurfaceWrapper(const Shared<SdlWindowWrapper> &swindow_wrapper) : 
+    SdlSurfaceWrapper::SdlSurfaceWrapper(const std::shared_ptr<SdlWindowWrapper> &swindow_wrapper) : 
         Wrapper<SDL_Surface>(std::bind_front(SdlSurfaceWrapper::destroySurface, this)), sdl_window_wrapper(swindow_wrapper) {
     
         m_instance = SDL_GetWindowSurface(sdl_window_wrapper->get());
@@ -31,7 +32,7 @@ namespace CzaraEngine {
         SDL_DestroyWindowSurface(sdl_window_wrapper->get());
     }
 
-    SdlRendererWrapper::SdlRendererWrapper(const Shared<SdlWindowWrapper> &window_wrapper) :
+    SdlRendererWrapper::SdlRendererWrapper(const std::shared_ptr<SdlWindowWrapper> &window_wrapper) :
         Wrapper<SDL_Renderer>(std::bind_front(SdlRendererWrapper::destroyRenderer, this)), sdl_window_wrapper(window_wrapper) {
         
         m_instance = SDL_CreateRenderer(sdl_window_wrapper->get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);

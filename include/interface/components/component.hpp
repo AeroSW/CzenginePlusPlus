@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared.hpp"
+#include <memory>
 #include <vector>
 #include <map>
 
@@ -13,13 +13,13 @@ namespace CzaraEngine {
             // renderComponent performs a Depth First Recursive Pattern with its children.
             virtual void renderComponent();
             virtual void addParent(Component * component);
-            virtual void addParent(Shared<Component> &component);
+            virtual void addParent(std::shared_ptr<Component> &component);
             virtual void addChild(Component * component);
-            virtual void addChild(Shared<Component> &component);
+            virtual void addChild(std::shared_ptr<Component> &component);
         protected:
             Component();
             Component(Component * parent);
-            Component(const Shared<Component> &parent);
+            Component(const std::shared_ptr<Component> &parent);
             // Method to execute any code prior to recursive call.
             // Able to set `renderChildren` to falsy to avoid rendering
             // child componens.
@@ -28,7 +28,7 @@ namespace CzaraEngine {
             virtual void endComponent() = 0;
 
             bool m_render_children = false;
-            Shared<Component> m_parent;
-            std::vector<Shared<Component>> children;
+            std::shared_ptr<Component> m_parent;
+            std::vector<std::shared_ptr<Component>> children;
     };
 }

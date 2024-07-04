@@ -1,7 +1,7 @@
 #pragma once
 
 #include "counter.hpp"
-#include "shared.hpp"
+#include <memory>
 #include "exception.hpp"
 
 namespace CzaraEngine {

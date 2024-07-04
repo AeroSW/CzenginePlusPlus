@@ -25,13 +25,13 @@ namespace CzaraEngine {
         <MenuItem />
         <Separator />
     */
-    class CzengineUxFileParser : public FileParser<Shared<Component>> {
+    class CzengineUxFileParser : public FileParser<std::shared_ptr<Component>> {
         public:
             CzengineUxFileParser(const fs::path &path);
             virtual ~CzengineUxFileParser();
-            virtual std::vector<Shared<Component>> processFile();
+            virtual std::vector<std::shared_ptr<Component>> processFile();
         private:
-            virtual Shared<Component> processPugiNode(pugi::xml_node &node);
+            virtual std::shared_ptr<Component> processPugiNode(pugi::xml_node &node);
             inline std::map<std::string, ComponentFunction>& getNodeParserMap();
             virtual std::string lookUpPugiErr(pugi::xml_parse_status &status);
             MainMenuParseHelper m_main_menu_xml_parse_helper;

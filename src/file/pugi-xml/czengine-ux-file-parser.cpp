@@ -3,18 +3,19 @@
 #include "xml-interface-binding-factory.hpp"
 #include "xml-callback-binding-factory.hpp"
 #include <sstream>
+#include <iostream>
 
 namespace CzaraEngine {
 
     CzengineUxFileParser::CzengineUxFileParser(const fs::path &path) :
-        FileParser<Shared<Component>>(path), m_main_menu_xml_parse_helper(),
+        FileParser<std::shared_ptr<Component>>(path), m_main_menu_xml_parse_helper(),
         m_window_layout_xml_parse_helper() {}
     CzengineUxFileParser::~CzengineUxFileParser() {}
-    std::vector<Shared<Component>> CzengineUxFileParser::processFile() {
+    std::vector<std::shared_ptr<Component>> CzengineUxFileParser::processFile() {
         pugi::xml_document document;
         pugi::xml_parse_result result = document.load_file(m_path.c_str());
         if (result.status == pugi::xml_parse_status::status_ok) {
-            std::vector<Shared<Component>> ux_components;
+            std::vector<std::shared_ptr<Component>> ux_components;
             pugi::xml_node content_node = document.first_child();
             std::string content_tag = content_node.name();
             if (content_tag != "Content") {
@@ -33,10 +34,10 @@ namespace CzaraEngine {
                         continue; // Skip if same file path as current.
                     }
                     CzengineUxFileParser nested_parser{file_path};
-                    std::vector<Shared<Component>> parsed_components = nested_parser.processFile();
+                    std::vector<std::shared_ptr<Component>> parsed_components = nested_parser.processFile();
                     ux_components.insert(std::end(ux_components), std::begin(parsed_components), std::end(parsed_components));
                 } else {
-                    Shared<Component> component = processPugiNode(child);
+                    std::shared_ptr<Component> component = processPugiNode(child);
                     ux_components.push_back(component);
                 }
             }
@@ -54,21 +55,21 @@ namespace CzaraEngine {
             THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, exception_msg.str());
         }
     }
-    Shared<Component> CzengineUxFileParser::processPugiNode(pugi::xml_node &node) {
+    std::shared_ptr<Component> CzengineUxFileParser::processPugiNode(pugi::xml_node &node) {
         // TODO: Figure out Factory Key based on XML Tag, Value, and Attributes
         std::string tag = node.name();
-        Shared<Component> component;
+        std::shared_ptr<Component> component;
         if (m_main_menu_xml_parse_helper.isMainMenuTag(tag)) {
             component = m_main_menu_xml_parse_helper.parseMainMenuXml(node, m_log_name);
         } else if (m_window_layout_xml_parse_helper.isWindowLayoutTag(tag)) {
             component = m_window_layout_xml_parse_helper.parseWindowLayoutXml(node, m_log_name);
         }
-        if (!component.isNullptr()) {
+        if (component) {
             for (pugi::xml_node child = node.first_child(); child; child = child.next_sibling()) {
                 std::string child_tag = child.name();
                 // If tag size is 0, then it isn't an <xml> tag
                 if (child_tag.size() == 0) continue;
-                Shared<Component> child_component = processPugiNode(child);
+                std::shared_ptr<Component> child_component = processPugiNode(child);
                 component.get()->addChild(child_component);
                 
                 child_component.get()->addParent(component);

@@ -4,7 +4,7 @@ namespace CzaraEngine {
     Component::Component() : m_render_children(false) {}
     Component::Component(Component * parent) :
         m_render_children(false), m_parent(parent) {}
-    Component::Component(const Shared<Component> &parent) :
+    Component::Component(const std::shared_ptr<Component> &parent) :
         m_render_children(false), m_parent(parent) {}
     Component::~Component() {
         children.empty();
@@ -13,7 +13,7 @@ namespace CzaraEngine {
     void Component::renderComponent() {
         beginComponent();
         if (m_render_children) {
-            for (Shared<Component> &child : children) {
+            for (std::shared_ptr<Component> &child : children) {
                 child.get()->renderComponent();
             }
             endComponent();
@@ -21,20 +21,20 @@ namespace CzaraEngine {
     }
 
     void Component::addParent(Component * component) {
-        Shared<Component> parent{component};
+        std::shared_ptr<Component> parent{component};
         m_parent = parent;
     }
 
-    void Component::addParent(Shared<Component> &component) {
+    void Component::addParent(std::shared_ptr<Component> &component) {
         m_parent = component;
     }
 
     void Component::addChild(Component * component) {
-        Shared<Component> child{component};
+        std::shared_ptr<Component> child{component};
         children.push_back(child);
     }
 
-    void Component::addChild(Shared<Component> &component) {
+    void Component::addChild(std::shared_ptr<Component> &component) {
         children.push_back(component);
     }
 }

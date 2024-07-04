@@ -1,11 +1,11 @@
 #pragma once
 
-#include "shared.hpp"
+#include <memory>
 
 namespace CzaraEngine {
     template<typename T>
     struct Result {
-        Shared<T> result;
+        std::shared_ptr<T> result;
         bool valid;
     };
 }

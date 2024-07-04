@@ -1,15 +1,16 @@
 #include "exception.hpp"
 
-#include "shared.hpp"
+#include <memory>
 #include "log-manager.hpp"
 #include "log-file.hpp"
 #include "app-configuration.hpp"
+#include <iostream>
 
 namespace CzaraEngine {
     template<typename T, typename U>
-    Shared<U> static_pointer_cast(Shared<T> &derived);
+    std::shared_ptr<U> static_pointer_cast(std::shared_ptr<T> &derived);
     template<typename T, typename U>
-    Shared<U> static_pointer_cast(const Shared<T> &derived);
+    std::shared_ptr<U> static_pointer_cast(const std::shared_ptr<T> &derived);
 
     //BEGIN Exception Wrappers
     void exceptionWrap(void (*func)()) {
@@ -83,7 +84,7 @@ namespace CzaraEngine {
             default_dir
         };
         if (!log_manager.hasLog(err_log_name)) {
-            const Shared<TimeLogFile> err_log{new TimeLogFile(props)};
+            const std::shared_ptr<TimeLogFile> err_log{new TimeLogFile(props)};
             LogManager log_manager;
             log_manager.registerLog(err_log_name, static_pointer_cast<Log>(err_log));
         }

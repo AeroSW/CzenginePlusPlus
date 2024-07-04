@@ -4,7 +4,7 @@
 #include "window.hpp"
 #include "SDL.h"
 #include "SDL_events.h"
-#include "shared.hpp"
+#include <memory>
 #include <thread>
 #include <vector>
 #include <queue>
@@ -23,21 +23,21 @@ namespace CzaraEngine {
             SdlWindow(const SdlWindow &window);
             SdlWindow(SdlWindow* window);
             virtual ~SdlWindow();
-            virtual void setInterface(Shared<DearImGuiInterface> &interface);
+            virtual void setInterface(std::shared_ptr<DearImGuiInterface> &interface);
             virtual bool addChild(const WindowProperties &properties);
             virtual void sustainEventLoop();
             virtual bool isOpen();
-            virtual Shared<SdlWindowWrapper>& getWindowWrapper();
-            virtual Shared<SdlRendererWrapper>& getRendererWrapper();
+            virtual std::shared_ptr<SdlWindowWrapper>& getWindowWrapper();
+            virtual std::shared_ptr<SdlRendererWrapper>& getRendererWrapper();
             static ui32 X_CENTER;
             static ui32 Y_CENTER;
         private: // Variables
             bool sustain = false;
-            Shared<SdlWindowWrapper> m_sdl_window;
-            Shared<SdlRendererWrapper> m_sdl_renderer;
-            Shared<DearImGuiInterface> m_interface;
+            std::shared_ptr<SdlWindowWrapper> m_sdl_window;
+            std::shared_ptr<SdlRendererWrapper> m_sdl_renderer;
+            std::shared_ptr<DearImGuiInterface> m_interface;
             SDL_mutex * m_event_mutex;
-            std::queue<Shared<void>> data_queue;
+            std::queue<std::shared_ptr<void>> data_queue;
         private: // Methods
             void processInterface(const std::stop_token &token);
     };
