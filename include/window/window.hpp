@@ -25,8 +25,8 @@ namespace CzaraEngine {
             virtual ~Window();
 
         protected:
-            ui16 width;
-            ui16 height;
+            ui32 width;
+            ui32 height;
             ui32 x_window_offset;
             ui32 y_window_offset;
             std::string name;
