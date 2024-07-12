@@ -68,6 +68,7 @@ namespace CzaraEngine {
     template<typename R, typename... A> // Overloaded = operator
     XmlInterfaceBindingFactory::DerivedFunctor<R,A...>& XmlInterfaceBindingFactory::DerivedFunctor<R,A...>::operator=(const XmlInterfaceBindingFactory::DerivedFunctor<R,A...>& df){
         m_functor = df.m_functor;
+        return *this;
     }
 
     template<typename U, typename... A>
