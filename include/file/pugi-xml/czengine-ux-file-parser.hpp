@@ -1,16 +1,18 @@
 #pragma once
 
 #include "component.hpp"
-#include "file-parser.hpp"
 #include "main-menu-helper.hpp"
 #include "window-ux-helper.hpp"
 #include "pugixml.hpp"
 
+#include <filesystem>
 #include <functional>
 #include <vector>
 
 typedef std::function<CzaraEngine::Component*(pugi::xml_node&)> ComponentFunction;
 typedef std::map<std::string, std::map<std::string, std::string>> CzengineXmlMap;
+
+namespace fs = std::filesystem;
 
 namespace CzaraEngine {
 
@@ -25,7 +27,7 @@ namespace CzaraEngine {
         <MenuItem />
         <Separator />
     */
-    class CzengineUxFileParser : public FileParser<std::shared_ptr<Component>> {
+    class CzengineUxFileParser {
         public:
             CzengineUxFileParser(const fs::path &path);
             virtual ~CzengineUxFileParser();
@@ -36,5 +38,6 @@ namespace CzaraEngine {
             virtual std::string lookUpPugiErr(pugi::xml_parse_status &status);
             MainMenuParseHelper m_main_menu_xml_parse_helper;
             WindowLayoutParseHelper m_window_layout_xml_parse_helper;
+            fs::path m_path;
     };
 }

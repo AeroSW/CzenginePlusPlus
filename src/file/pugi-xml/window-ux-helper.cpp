@@ -1,7 +1,7 @@
 #include "window-ux-helper.hpp"
 
 #include "exception.hpp"
-#include "log-manager.hpp"
+#include "app-logs.hpp"
 #include "dimgui-window.hpp"
 #include "xml-interface-binding-factory.hpp"
 
@@ -20,27 +20,16 @@ namespace CzaraEngine {
     bool WindowLayoutParseHelper::isWindowLayoutTag(const std::string &tag) {
         return WINDOW_LAYOUT_TAGS.find(tag) != WINDOW_LAYOUT_TAGS.end();
     }
-    std::shared_ptr<Component> WindowLayoutParseHelper::parseWindowLayoutXml(pugi::xml_node &node, const std::string &log_name) {
+    std::shared_ptr<Component> WindowLayoutParseHelper::parseWindowLayoutXml(pugi::xml_node &node) {
         const std::string txt = node.name();
-        LogManager manager;
         if (txt == ENABLE_DOCKING_XML) {
             return parseEnableDocking(node);
         } else if (txt == PANEL_XML) {
-            std::shared_ptr<Component> temp = parsePanel(node);
-            std::ostringstream panel_out;
-            panel_out << *((Panel*) temp.get()) << "\n";
-            manager.writeToLog(log_name, panel_out.str());
-            return temp;
+            return parsePanel(node);
         } else if (txt == TEXT_XML) {
             return parseText(node);
         }
-        std::string err_msg = "Invalid XML Format for parsing the window's body layout.";
-        if(!manager.hasLog(log_name)) {
-            THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, err_msg);
-        }
-        std::ostringstream log_output;
-        log_output << "Invalid Body XML Tag: " << txt << std::endl;
-        manager.writeToLog(log_name, log_output.str());
+        Logger::file_log() << "Invalid Body XML Tag: " << txt << endl;
         THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, "Body XML Parsing Exception.");
     }
     

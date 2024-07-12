@@ -2,14 +2,15 @@
 #include "exception.hpp"
 #include "xml-interface-binding-factory.hpp"
 #include "xml-callback-binding-factory.hpp"
+#include "app-logs.hpp"
 #include <sstream>
 #include <iostream>
 
 namespace CzaraEngine {
 
     CzengineUxFileParser::CzengineUxFileParser(const fs::path &path) :
-        FileParser<std::shared_ptr<Component>>(path), m_main_menu_xml_parse_helper(),
-        m_window_layout_xml_parse_helper() {}
+        m_main_menu_xml_parse_helper(), m_window_layout_xml_parse_helper(),
+        m_path(path) {}
     CzengineUxFileParser::~CzengineUxFileParser() {}
     std::vector<std::shared_ptr<Component>> CzengineUxFileParser::processFile() {
         pugi::xml_document document;
@@ -21,8 +22,8 @@ namespace CzaraEngine {
             if (content_tag != "Content") {
                 std::ostringstream msg;
                 msg << "XML Document Formatting Failure\n";
-                msg << "\tFirst XML Tag in " << m_path << " is not '<Content>'." << std::endl;
-                getLogManager().writeToLog(m_log_name, msg.str());
+                msg << "\tFirst XML Tag in " << m_path << " is not '<Content>'.";
+                Logger::file_log() << msg.str() << endl;
                 THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, "Invalid XML format.");
             }
             for (pugi::xml_node child = content_node.first_child(); child; child = child.next_sibling()) {
@@ -47,11 +48,10 @@ namespace CzaraEngine {
             msg << "XML Document Load Failure\n";
             msg << "\tPugiXML Result Status:     \t" << lookUpPugiErr(result.status) << "\n";
             msg << "\tPugiXML Result Description:\t" << result.description() << "\n";
-            msg << "\tPugiXML File:              \t" << m_path << std::endl;
-            std::string log_name = m_log_name;
-            getLogManager().writeToLog(log_name, msg.str());
+            msg << "\tPugiXML File:              \t" << m_path;
+            Logger::file_log() << msg.str() << endl;
             std::ostringstream exception_msg;
-            exception_msg << "Failed to load Ux Specification.  Please check '" << m_log_name << "' logs for details.";
+            exception_msg << "Failed to load Ux Specification.  Please check '" << getActiveFileName(Logger::file_log()) << "' logs for details.";
             THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, exception_msg.str());
         }
     }
@@ -60,9 +60,9 @@ namespace CzaraEngine {
         std::string tag = node.name();
         std::shared_ptr<Component> component;
         if (m_main_menu_xml_parse_helper.isMainMenuTag(tag)) {
-            component = m_main_menu_xml_parse_helper.parseMainMenuXml(node, m_log_name);
+            component = m_main_menu_xml_parse_helper.parseMainMenuXml(node);
         } else if (m_window_layout_xml_parse_helper.isWindowLayoutTag(tag)) {
-            component = m_window_layout_xml_parse_helper.parseWindowLayoutXml(node, m_log_name);
+            component = m_window_layout_xml_parse_helper.parseWindowLayoutXml(node);
         }
         if (component) {
             for (pugi::xml_node child = node.first_child(); child; child = child.next_sibling()) {
@@ -70,9 +70,9 @@ namespace CzaraEngine {
                 // If tag size is 0, then it isn't an <xml> tag
                 if (child_tag.size() == 0) continue;
                 std::shared_ptr<Component> child_component = processPugiNode(child);
-                component.get()->addChild(child_component);
+                component->addChild(child_component);
                 
-                child_component.get()->addParent(component);
+                child_component->addParent(component);
             }
             return component;
         }

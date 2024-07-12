@@ -46,8 +46,12 @@ function buildSolution() {
     MAKE_OO=$(make CXX=g++)
     printf "${GREEN}Make output:\n"
     printf "${GREEN}${MAKE_OO}\n"
-    printf "${GREEN}Copying assets.\n"
+    if [ ! -d "./bin/Win64/Debug/config" ]; then
+        printf "${GREEN}Copying configurations.\n"
+        cp -rf "./config" "bin/Win64/Debug/config"
+    fi
     if [ ! -d "./bin/Win64/Debug/czengine-interface" ]; then
+        printf "${GREEN}Copying assets.\n"
         cp -rf "./czengine-interface" "bin/Win64/Debug/czengine-interface"
     fi
 }

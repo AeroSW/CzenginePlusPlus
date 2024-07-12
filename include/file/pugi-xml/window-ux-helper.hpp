@@ -13,7 +13,7 @@ namespace CzaraEngine {
             virtual ~WindowLayoutParseHelper();
 
             virtual bool isWindowLayoutTag(const std::string &tag);
-            virtual std::shared_ptr<Component> parseWindowLayoutXml(pugi::xml_node &node, const std::string &log_name);
+            virtual std::shared_ptr<Component> parseWindowLayoutXml(pugi::xml_node &node);
 
         private:
             const static std::string ENABLE_DOCKING_XML;

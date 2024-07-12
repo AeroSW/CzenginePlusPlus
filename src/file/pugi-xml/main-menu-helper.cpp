@@ -1,7 +1,7 @@
 #include "main-menu-helper.hpp"
 
 #include "exception.hpp"
-#include "log-manager.hpp"
+#include "app-logs.hpp"
 #include "xml-interface-binding-factory.hpp"
 #include "xml-callback-binding-factory.hpp"
 
@@ -21,7 +21,7 @@ namespace CzaraEngine {
     bool MainMenuParseHelper::isMainMenuTag(const std::string &tag) {
         return MAIN_MENU_TAGS.find(tag) != MAIN_MENU_TAGS.end();
     }
-    std::shared_ptr<Component> MainMenuParseHelper::parseMainMenuXml(pugi::xml_node &node, const std::string &log_name) {
+    std::shared_ptr<Component> MainMenuParseHelper::parseMainMenuXml(pugi::xml_node &node) {
         const std::string text = node.name();
         if (text == MAIN_MENU_BAR_XML) {
             return parseMainMenuBar(node);
@@ -31,17 +31,9 @@ namespace CzaraEngine {
             return parseMenuItem(node);
         } else if (text == MENU_SEPARATOR_XML) {
             return parseMenuSeparator(node);
-        } else {
-            LogManager manager;
-            std::string err_msg = "Invalid XML Format for parsing menu.";
-            if(!manager.hasLog(log_name)) {
-                THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, err_msg);
-            }
-            std::ostringstream log_output;
-            log_output << "Invalid Main Menu XML Tag: " << text << std::endl;
-            manager.writeToLog(log_name, log_output.str());
-            THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, "Main Menu XML Parsing Exception.");
         }
+        Logger::file_log() << "Invalid Main Menu XML Tag: " << text << endl;
+        THROW_EXCEPTION(EngineExceptionCode::FILE_EXCEPTION, "Main Menu XML Parsing Exception.");
     }
     std::shared_ptr<Component> MainMenuParseHelper::parseMainMenuBar(pugi::xml_node &node) {
         std::string tag = node.name();

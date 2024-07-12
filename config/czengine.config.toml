@@ -1,0 +1,34 @@
+[application]
+title = "Czara Game Engine"
+author = "Kenneth Cornett Jr. (Czara Software)"
+
+[interface]
+directory = "./czengine-interface"
+name = "czengine-interface.xml"
+
+[render]
+api = "Vulkan"
+
+[logging]
+directory = "./logging"
+
+[[logging.logs]]
+name = "application"
+type = "time"
+[logging.logs.constraints]
+amount = 10
+unit = "minutes"
+
+[[logging.logs]]
+name = "error"
+type = "size"
+[logging.logs.constraints]
+amount = 10
+unit = "MB"
+
+[[logging.logs]]
+name = "file"
+type = "size"
+[logging.logs.constraints]
+amount = 10
+unit = "MB"

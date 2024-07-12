@@ -12,7 +12,7 @@ namespace CzaraEngine {
             MainMenuParseHelper();
             virtual ~MainMenuParseHelper();
             virtual bool isMainMenuTag(const std::string &tag);
-            virtual std::shared_ptr<Component> parseMainMenuXml(pugi::xml_node &node, const std::string &log_name);
+            virtual std::shared_ptr<Component> parseMainMenuXml(pugi::xml_node &node);
         private:
             const static std::string MAIN_MENU_BAR_XML;
             const static std::string MENU_XML;

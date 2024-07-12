@@ -8,16 +8,19 @@ namespace CzaraEngine {
     // LogFile
     LogFile::LogFile(const LogFileProps &props) : Log(), m_amount(props.amount),
         m_base_name(props.base_name), m_base_directory(props.base_directory) {
-        #ifdef _WIN32
-            m_line_end = "\r\n";
-        #elif defined macintosh // OS 9
-            m_line_end = "\r";
-        #else
-            m_line_end = "\n"; // Mac OS X uses \n
-        #endif
         try {
-            if (fs::exists(m_base_directory) || !fs::create_directory(m_base_directory)) {
-                std::cerr << "Directory already exists.\n";
+            if (!fs::exists(m_base_directory) && !fs::create_directory(m_base_directory)) {
+                std::cerr << "Directory was unable to be created.\n";
+            }
+        } catch (fs::filesystem_error fs_err) {
+            std::cerr << "Filesystem error thrown.\n";
+        }
+    }
+    LogFile::LogFile(LogFile * file) : Log(), m_amount(file->m_amount),
+        m_base_name(file->m_base_name), m_base_directory(file->m_base_directory) {
+        try {
+            if (!fs::exists(m_base_directory) && !fs::create_directory(m_base_directory)) {
+                std::cerr << "Directory was unable to be created.\n";
             }
         } catch (fs::filesystem_error fs_err) {
             std::cerr << "Filesystem error thrown.\n";
@@ -38,6 +41,7 @@ namespace CzaraEngine {
         }
         return true;
     }
+
     void LogFile::rotateFile() {
         if (!hasExceededAmount()) return;
 
@@ -46,22 +50,19 @@ namespace CzaraEngine {
         m_active_file = generateFileName();
         m_file.open(m_active_file);
     }
-    std::string LogFile::endLine() {
-        #ifdef _WIN32
-            static std::string line_end = "\r\n";
-        #elif defined macintosh // OS 9
-            static std::string line_end = "\r";
-        #else
-            static std::string line_end = "\n"; // Mac OS X uses \n
-        #endif
-        return line_end;
-    }
     // END LogFile
 
     // TimeLogFile
-    TimeLogFile::TimeLogFile(const LogFileProps &log_file_props) : LogFile(log_file_props) {
+    TimeLogFile::TimeLogFile(const LogFileProps &log_file_props) : 
+        LogFile(log_file_props) {
         std::chrono::seconds sec = std::chrono::seconds(m_amount);
-        if (min_time_allowed_in_minutes > sec) {
+        if (10min > sec) {
+            throw "Invalid file size";
+        }
+    }
+    TimeLogFile::TimeLogFile(TimeLogFile * file) : LogFile(file) {
+        std::chrono::seconds sec = std::chrono::seconds(m_amount);
+        if (10min > sec) {
             throw "Invalid file size";
         }
     }
@@ -80,32 +81,35 @@ namespace CzaraEngine {
         m_active_file = filename;
         return m_file.is_open();
     }
-    bool TimeLogFile::hasExceededAmount() const {
+    bool TimeLogFile::hasExceededAmount() {
         chrono::time_point<chrono::system_clock> now = chrono::system_clock::now();
         // I'm okay with losing precision, since I wanted time-based file logging to be in seconds.
         auto diff = chrono::duration_cast<std::chrono::seconds>(now - timestamp);
         ui64 diff_sz = diff.count();
         return diff_sz > m_amount;
     }
-    fs::path TimeLogFile::generateFileName() const {
+    fs::path TimeLogFile::generateFileName() {
         std::ostringstream filename;
         chrono::time_point<chrono::system_clock> now = chrono::system_clock::now();
-        std::time_t t_c = chrono::system_clock::to_time_t(now);
+        auto dur = chrono::duration_cast<std::chrono::seconds>(now - timestamp);
+        timestamp += dur;
+        std::time_t t_c = chrono::system_clock::to_time_t(timestamp);
         filename << std::put_time(std::localtime(&t_c), "%F_%H_%M");
         filename << "_" << m_base_name << ".txt";
         return m_base_directory / filename.str();
     }
     std::ostream& TimeLogFile::write(const char * msg) {
         rotateFile();
-        return m_file << msg << m_line_end << std::endl;
+        return m_file << msg << std::flush;
     }
     std::ostream& TimeLogFile::write(const std::string &msg) {
         rotateFile();
-        return m_file << msg << m_line_end << std::endl;
+        return m_file << msg << std::flush;
     }
     std::ostream& TimeLogFile::write(std::ostream &msg) {
         rotateFile();
-        return m_file << msg.rdbuf() << m_line_end << std::endl;
+        auto buf = msg.rdbuf();
+        return m_file << buf << std::flush;
     }
     // END TimeLogFile
 
@@ -131,42 +135,42 @@ namespace CzaraEngine {
         m_active_file = filename;
         return m_file.is_open();
     }
-    bool SizeLogFile::hasExceededAmount() const {
+    bool SizeLogFile::hasExceededAmount() {
         ui64 file_size = fs::file_size(m_active_file);
         return (file_size + m_input_buffer) > m_amount;
     }
-    fs::path SizeLogFile::generateFileName() const {
+    fs::path SizeLogFile::generateFileName() {
         std::ostringstream filename;
         filename << m_base_name;
-        filename << std::setfill('0') << std::setw(m_suffix_length) << m_increment << ".txt";
+        filename << "_" << std::setfill('0') << std::setw(m_suffix_length) << m_increment << ".txt";
         const_cast<SizeLogFile*>(this)->m_increment++;
         return m_base_directory / filename.str();
     }
     std::ostream& SizeLogFile::write(const char * msg) {
         m_input_buffer = std::strlen(msg);
         rotateFile();
-        m_file << msg << std::endl;
-        return m_file;
+        return m_file << msg << std::flush;
     }
     std::ostream& SizeLogFile::write(const std::string &msg) {
         m_input_buffer = msg.size();
         rotateFile();
-        m_file << msg << std::endl;
-        return m_file;
+        return m_file << msg << std::flush;
     }
     std::ostream& SizeLogFile::write(std::ostream &msg) {
         m_input_buffer = msg.tellp();
         rotateFile();
-        m_file << msg.rdbuf() << std::endl;
-        return m_file;
+        return m_file << msg.rdbuf() << std::flush;
     }
     // END SizeLogFile
 
     // LogFile Friends
-    bool open(const LogFile &log_file) {
+    std::string getActiveFileName(LogFile &log_file) {
+        return log_file.m_active_file.string();
+    }
+    bool open(LogFile &log_file) {
         if (!log_file.isOpen()) {
             fs::path filename = log_file.generateFileName();
-            return const_cast<LogFile*>(&log_file)->open(filename);
+            return log_file.open(filename);
         }
         return false;
     }
@@ -174,15 +178,39 @@ namespace CzaraEngine {
     std::ostringstream LogFile::getClassDetails() const {
         std::ostringstream stream;
         std::string open_status = (isOpen()) ? "OPEN" : "CLOSE";
-        stream << "Log File Output Stream:" << m_line_end;
-        stream << "\tActive File Name: " << m_active_file << m_line_end;
-        stream << "\tOpen Status: " << open_status << " | File Size: " << fs::file_size(m_active_file) << m_line_end;
-        stream << "\tBase File Name: " << m_base_name << " | Base Path: " << m_base_directory << m_line_end;
-        stream << "\t\tPreviously Created Log Files (" << m_related_files.size() << "):" << m_line_end;
+        stream << "Log File Output Stream:" << endl;
+        stream << "\tActive File Name: " << m_active_file << endl;
+        stream << "\tOpen Status: " << open_status << " | File Size: " << fs::file_size(m_active_file) << endl;
+        stream << "\tBase File Name: " << m_base_name << " | Base Path: " << m_base_directory << endl;
+        stream << "\t\tPreviously Created Log Files (" << m_related_files.size() << "):" << endl;
         
         for (const fs::path &prev : m_related_files) {
-            stream << "\t\t - " << prev << " | Size: " << fs::file_size(prev) << m_line_end;
+            stream << "\t\t - " << prev << " | Size: " << fs::file_size(prev) << endl;
         }
+        return stream;
+    }
+
+    std::ostream& operator<<(LogFile& log_file, std::ostream &stream) {
+        if (!log_file.isOpen() && !open(log_file)) {
+            std::exit(1);
+        }
+        return log_file.write(stream);
+    }
+    std::ostream& operator<<(LogFile& log_file, std::string &str) {
+        if (!log_file.isOpen() && !open(log_file)) {
+            std::exit(1);
+        }
+        return log_file.write(str);
+    }
+    std::ostream& operator<<(LogFile& log_file, const char* c_str) {
+        if (!log_file.isOpen() && !open(log_file)) {
+            std::exit(1);
+        }
+        return log_file.write(c_str);
+    }
+    std::ostream& operator<<(std::ostream& stream, LogFile& log_file) {
+        std::ostringstream output = log_file.getClassDetails();
+        stream << output.str();
         return stream;
     }
 

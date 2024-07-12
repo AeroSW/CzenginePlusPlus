@@ -19,12 +19,11 @@ namespace CzaraEngine {
     
     void exceptionWrap(void (*func)());
     template<typename... A>
-    void exceptionWrapVoid(void (*func)(A...), A... args);
+    void exceptionWrapVoidWithArgs(void (*func)(A...), A... args);
     template<typename T, typename... A>
     T exceptionWrapReturn(T (*func)(A...), A... args);
 
     void handleException(EngineException&);
-    void setupErrLog();
     
     #ifndef THROW_EXCEPTION
         // err_code is an EngineExceptionCode
