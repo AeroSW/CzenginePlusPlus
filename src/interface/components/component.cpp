@@ -14,7 +14,7 @@ namespace CzaraEngine {
         beginComponent();
         if (m_render_children) {
             for (std::shared_ptr<Component> &child : children) {
-                child.get()->renderComponent();
+                child->renderComponent();
             }
             endComponent();
         }

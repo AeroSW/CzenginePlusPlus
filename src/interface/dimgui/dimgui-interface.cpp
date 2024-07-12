@@ -1,6 +1,8 @@
 #include "dimgui-interface.hpp"
 #include <iostream>
 
+#include "backends/imgui_impl_sdl2.h"
+
 namespace CzaraEngine {
     
     DearImGuiInterface::DearImGuiInterface(std::shared_ptr<SdlWindowWrapper> &window, std::shared_ptr<SdlRendererWrapper> &renderer) :
@@ -40,10 +42,12 @@ namespace CzaraEngine {
             ImGui::GetDrawData(),
             m_renderer->get()
         );
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
     }
     void DearImGuiInterface::drawInterface() {
         for (std::shared_ptr<Component> component : m_components) {
-            component.get()->renderComponent();
+            component->renderComponent();
         }
     }
     void DearImGuiInterface::processEvent(SDL_Event &event) {

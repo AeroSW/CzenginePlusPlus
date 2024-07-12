@@ -31,6 +31,8 @@ namespace CzaraEngine {
             virtual std::shared_ptr<SdlRendererWrapper>& getRendererWrapper();
             static ui32 X_CENTER;
             static ui32 Y_CENTER;
+
+            static void showErrorMessageBox(const std::string &title, const std::string &msg);
         private: // Variables
             bool sustain = false;
             std::shared_ptr<SdlWindowWrapper> m_sdl_window;
@@ -38,6 +40,7 @@ namespace CzaraEngine {
             std::shared_ptr<DearImGuiInterface> m_interface;
             SDL_mutex * m_event_mutex;
             std::queue<std::shared_ptr<void>> data_queue;
+            
         private: // Methods
             void processInterface(const std::stop_token &token);
     };

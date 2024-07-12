@@ -1,12 +1,10 @@
-#include "app-configuration.hpp"
+#include "app-logs.hpp"
 #include "inttypes.hpp"
 #include "sdl-window.hpp"
+#include "czengine-config-parser.hpp"
 #include "czengine-ux-file-parser.hpp"
 #include "event-queue.hpp"
 
-#include "imgui.h"
-
-#include <iostream>
 #include <thread>
 #include <memory>
 #include <string>
@@ -23,7 +21,9 @@ namespace CzaraEngine {
         Window(properties), sustain(false), m_sdl_window(new SdlWindowWrapper(properties)), 
         m_sdl_renderer(new SdlRendererWrapper(m_sdl_window)),
         m_interface(new DearImGuiInterface(m_sdl_window, m_sdl_renderer)) {
+        Logger::app_log() << "Spinning up thread to parse Czengine Ux." << endl;
         std::jthread jay(std::bind_front(SdlWindow::processInterface, this));
+        Logger::app_log() << "Starting SDL2 Event Loop." << endl;
         sustainEventLoop();
     }
 
@@ -37,7 +37,7 @@ namespace CzaraEngine {
         if (!m_sdl_renderer) {
             throw "SDL Renderer Creation Failed";
         }
-        
+        Logger::app_log() << "Starting SDL2 Event Loop." << endl;
         sustainEventLoop();
     }
 
@@ -51,7 +51,7 @@ namespace CzaraEngine {
         if (!m_sdl_renderer) {
             throw "SDL Renderer Creation Failed";
         }
-        
+        Logger::app_log() << "Starting SDL2 Event Loop." << endl;
         sustainEventLoop();
     }
 
@@ -64,7 +64,7 @@ namespace CzaraEngine {
             this->children.push_back(std::shared_ptr<Window>(new SdlWindow(properties)));
         } catch(ui8 errCode) {
             // ToDo: Implement logging for error
-            std::cerr << "Error Code, " << errCode << ", was intercepted.\n";
+            Logger::err_log() << "Error Code, " << errCode << ", was intercepted.\n";
             return false;
         }
         return true;
@@ -76,11 +76,12 @@ namespace CzaraEngine {
             SDL_SetRenderDrawColor(m_sdl_renderer->get(), 100, 100, 100, 255);
             SDL_Event sdl_event;
             while(SDL_PollEvent(&sdl_event) > 0) {
-                m_interface.get()->processEvent(sdl_event);
+                m_interface->processEvent(sdl_event);
                 switch (sdl_event.type) {
                     case SDL_WINDOWEVENT:
                         switch(sdl_event.window.event) {
                             case SDL_WINDOWEVENT_CLOSE:
+                                Logger::app_log() << "Window close event detected.  Closing SDL2 Window..." << endl;
                                 sustain = false;
                                 break;
                         }
@@ -92,13 +93,15 @@ namespace CzaraEngine {
                     case EventDataObject::COMPONENT: { // this ("{}" inside a case) is a stupid new feature of C++.
                         std::shared_ptr<Component> component = EventDataQueue::dequeue<Component>();
                         if (!!component) {
-                            m_interface.get()->addComponent(component);
+                            Logger::app_log() << "Adding a new component to Ux." << endl;
+                            m_interface->addComponent(component);
                         }
                         break;
                     } case EventDataObject::COMPONENT_COLLECTION: {
                         std::shared_ptr<std::vector<std::shared_ptr<Component>>> components = EventDataQueue::dequeue<std::vector<std::shared_ptr<Component>>>();
                         if (!!components) {
-                            m_interface.get()->addComponents(*(components.get()));
+                            Logger::app_log() << "Multiple new components added to Ux." << endl;
+                            m_interface->addComponents(*components);
                         }
                         break;
                     } case EventDataObject::STRING: {
@@ -107,17 +110,12 @@ namespace CzaraEngine {
                     }
                 };
             }
-            m_interface.get()->newFrame();
-            m_interface.get()->drawInterface();
+            m_interface->newFrame();
+            m_interface->drawInterface();
 
-            // ImGui::DockSpaceOverViewport();
-            // ImGui::Begin("Init Panel");
-            // ImGui::Text("Panel Content");
-            // ImGui::End();
-
-            m_interface.get()->render();
+            m_interface->render();
             SDL_RenderClear(m_sdl_renderer->get());
-            m_interface.get()->draw();
+            m_interface->draw();
             SDL_RenderPresent(m_sdl_renderer->get());
         }
     }
@@ -138,11 +136,18 @@ namespace CzaraEngine {
     }
 
     void SdlWindow::processInterface(const std::stop_token &token) {
-        fs::path interface_file{app_config.getReference().default_interface_file};
+        CzengineConfigManager config_manager;
+        std::string full_path = config_manager.getAppConfig().interface.directory + "/" + config_manager.getAppConfig().interface.name;
+        Logger::app_log() << "Starting to parse Ux File, [" << full_path << "]." << endl;
+        fs::path interface_file{full_path};
         CzengineUxFileParser ux_file_processor{interface_file};
         std::shared_ptr<void> void_ref {new std::vector<std::shared_ptr<Component>>(ux_file_processor.processFile())};
         EventDataObject edo = EventDataObject::COMPONENT_COLLECTION;
+        Logger::app_log() << "Enqueuing parsed Ux Components." << endl;
         EventDataQueue::enqueue(edo, void_ref);
     }
 
+    void SdlWindow::showErrorMessageBox(const std::string &title, const std::string &msg) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.c_str(), msg.c_str(), NULL);
+    }
 }
