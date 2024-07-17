@@ -50,11 +50,5 @@ versions = ['1.3.283.0']
 type = "partial"
 path = "__include__"
 [[external.include.libraries]]
-name = "DearImGui"
-type = "git"
-branch = "docking"
-commits = ["5ea96c1"]
-[[external.include.libraries]]
-name = "PugiXml"
-[[external.include.libraries]]
 name = "Toml++"
+url = "https://raw.githubusercontent.com/marzer/tomlplusplus/master/toml.hpp"

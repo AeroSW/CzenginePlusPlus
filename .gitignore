@@ -44,3 +44,4 @@ CzenginePlusPlus.make
 /obj
 /lib
 /scripts/__pycache__
+/extern
