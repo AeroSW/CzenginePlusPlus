@@ -1,47 +1,47 @@
 [external]
-[external.vendored.directory]
+[external.vendor.directory]
 type = "partial" # "partial" or "full"
 path = "__vendor__" # do not include './' here
 
-[[external.vendored.libraries]]
+[[external.vendor.libraries]]
 name = "SDL2"
 url = "https://github.com/libsdl-org/SDL/releases/download/release-{version}/SDL2-devel-{version}-{compiler}.zip"
 versions = ['2.30.5']
 license = ""
-[external.vendored.libraries.MinGW]
+[external.vendor.libraries.MinGW]
 compiler = "mingw"
-[external.vendored.libraries.MinGW.x64]
+[external.vendor.libraries.MinGW.x64]
 directory = "SDL2-{version}/x86_64-w64-mingw32"
-[external.vendored.libraries.MinGW.x86]
+[external.vendor.libraries.MinGW.x86]
 directory = "SDL2-{version}/i686-w64-mingw32"
-[external.vendored.libraries.VisualStudio]
+[external.vendor.libraries.VisualStudio]
 compiler = "VC"
 include = "SDL2-{version}/include"
-[external.vendored.libraries.VisualStudio.x64]
+[external.vendor.libraries.VisualStudio.x64]
 lib = "SDL2-{version}/lib/x64"
-[external.vendored.libraries.VisualStudio.x86]
+[external.vendor.libraries.VisualStudio.x86]
 lib = "SDL2-{version}/lib/x86"
 
-[[external.vendored.libraries]]
+[[external.vendor.libraries]]
 name = "SDL2_ttf"
 url = "https://github.com/libsdl-org/SDL_ttf/releases/download/release-{version}/SDL2_ttf-devel-{version}-{compiler}.zip"
 versions = ['2.22.0']
 license = ""
-[external.vendored.libraries.MinGW]
+[external.vendor.libraries.MinGW]
 compiler = "mingw"
-[external.vendored.libraries.MinGW.x64]
+[external.vendor.libraries.MinGW.x64]
 directory = "SDL2_ttf-{version}/x86_64-w64-mingw32"
-[external.vendored.libraries.MinGW.x86]
+[external.vendor.libraries.MinGW.x86]
 directory = "SDL2_ttf-{version}/i686-w64-mingw32"
-[external.vendored.libraries.VisualStudio]
+[external.vendor.libraries.VisualStudio]
 compiler = "VC"
 include = "SDL2_ttf-{version}/include"
-[external.vendored.libraries.VisualStudio.x64]
+[external.vendor.libraries.VisualStudio.x64]
 lib = "SDL2_ttf-{version}/lib/x64"
-[external.vendored.libraries.VisualStudio.x86]
+[external.vendor.libraries.VisualStudio.x86]
 lib = "SDL2_ttf-{version}/lib/x86"
 
-[[external.vendored.libraries]]
+[[external.vendor.libraries]]
 name = "Vulkan"
 url = "https://sdk.lunarg.com/sdk/download/{version}/{operating_system}/VulkanSDK-{version}-Installer.exe"
 versions = ['1.3.283.0']
@@ -52,3 +52,4 @@ path = "__include__"
 [[external.include.libraries]]
 name = "Toml++"
 url = "https://raw.githubusercontent.com/marzer/tomlplusplus/master/toml.hpp"
+include = "."

@@ -54,3 +54,6 @@ def downloadDependency(lib_name: str, lib_url: str, lib_dir: str):
         print(f"{AnsiColors.RED}Temp directory, [{lib_dir}], should not exist.")
         exit()
 
+def handleSubmodules():
+    # TODO
+    print(f"{AnsiColors.RED}TODO: Handle GIT Submodules for CzenginePlusPlus.")

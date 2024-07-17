@@ -37,7 +37,7 @@ The project is using Dear ImGui for implementing an interface, and I'm utilizing
 - [ ] Add instructions to Python script to parse and download libraries belonging to `/extern/` directory.
 - [ ] Implement Vulkan Render APIs for SDL2 and Dear ImGui
 - [ ] Start writing unit tests for key features
-- [ ] Restructure Czengine to be Git Repo with Sub Repos rather than one large repo.
+- [x] Restructure Czengine to be Git Repo with Sub Repos rather than one large repo.
 - [ ] Integrate Linear Math library (most likely Eigen)
 - [ ] Work on Render Pipeline
 - [ ] Replace usage of `build.sh` with another Python script/flag
