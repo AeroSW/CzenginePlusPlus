@@ -14,13 +14,13 @@ int main() {
         std::exit(1);
     }
 
-    std::unique_ptr<SdlWindow> m_window = std::make_unique<SdlWindow>(WindowProperties{
+    SdlWindow m_window{WindowProperties{
         800,
         600,
         SdlWindow::X_CENTER,
         SdlWindow::Y_CENTER,
         config_manager.getAppConfig().title
-    });
+    }};
 
     return 0;
 }
