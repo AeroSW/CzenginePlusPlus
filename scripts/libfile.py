@@ -20,23 +20,23 @@ def getFileName(url: str):
     if (len(url_parts) == 0):
         url_parts = url.rsplit('\\', 1)
     if (len(url_parts) == 0):
-        print(f"\t{AnsiColors.RED}Invalid file download URL: {url}.")
+        print(f"\t{AnsiColors.RED}Invalid file download URL: {url}.{AnsiColors.DEFAULT}")
         exit(1)
     return url_parts[-1]
 
 def handleZip(handle_details: HandleDetails):
-    print(f'{AnsiColors.CYAN}Working in {AnsiColors.BOLD}{handle_details.file_working_dir}')
+    print(f'{AnsiColors.CYAN}Working in {AnsiColors.BOLD}{handle_details.file_working_dir}{AnsiColors.DEFAULT}')
     filepath = os.path.join(handle_details.file_working_dir, handle_details.filename)
     tmp_dir = os.path.join(handle_details.file_working_dir, 'tmp')
     os.makedirs(tmp_dir)
     if (not os.path.exists(filepath) or not os.path.isfile(filepath)):
-        print(f"\t{AnsiColors.RED}Downloaded file does not exist...\n\t\t{filepath}")
+        print(f"\t{AnsiColors.RED}Downloaded file does not exist...\n\t\t{filepath}{AnsiColors.DEFAULT}")
         exit(1)
-    print(f"\t{AnsiColors.CYAN}Unzipping file, {AnsiColors.YELLOW}[{filepath}]{AnsiColors.CYAN}, to temp folder, {AnsiColors.YELLOW}[{tmp_dir}]{AnsiColors.CYAN}")
+    print(f"\t{AnsiColors.CYAN}Unzipping file, {AnsiColors.YELLOW}[{filepath}]{AnsiColors.CYAN}, to temp folder, {AnsiColors.YELLOW}[{tmp_dir}]{AnsiColors.DEFAULT}")
     unzipFile(filepath, tmp_dir)
-    print(f"\t{AnsiColors.GREEN}Finished unzipping {AnsiColors.YELLOW}[{filepath}]{AnsiColors.CYAN}, moving required files to {AnsiColors.YELLOW}[{handle_details.file_working_dir}]{AnsiColors.CYAN}.")
+    print(f"\t{AnsiColors.GREEN}Finished unzipping {AnsiColors.YELLOW}[{filepath}]{AnsiColors.CYAN}, moving required files to {AnsiColors.YELLOW}[{handle_details.file_working_dir}]{AnsiColors.CYAN}.{AnsiColors.DEFAULT}")
     moveRequiredContent(handle_details.file_working_dir, tmp_dir, handle_details)
-    print(f"\t{AnsiColors.GREEN}Finished moving files, deleting the temp handle_details.directory, {AnsiColors.YELLOW}[{tmp_dir}]{AnsiColors.CYAN}.")
+    print(f"\t{AnsiColors.GREEN}Finished moving files, deleting the temp handle_details.directory, {AnsiColors.YELLOW}[{tmp_dir}]{AnsiColors.CYAN}.{AnsiColors.DEFAULT}")
     shutil.rmtree(tmp_dir, ignore_errors=True)
     print(f"\t{AnsiColors.GREEN}Finished deleting the temporary folder. Deleting zip file.")
     os.remove(filepath)
@@ -76,9 +76,10 @@ def handleExe(handle_details: HandleDetails):
         return
     filepath = os.path.join(handle_details.file_working_dir, handle_details.filename)
     os.startfile(filepath)
-    print(f'{AnsiColors.CYAN}Please restart setup script when installation of {AnsiColors.YELLOW}{handle_details.filename}{AnsiColors.CYAN} is finished.')
+    print(f'{AnsiColors.CYAN}Please restart setup script when installation of {AnsiColors.YELLOW}{handle_details.filename}{AnsiColors.CYAN} is finished.{AnsiColors.DEFAULT}')
     quit()
 
 def handleOtherFiles(details: HandleDetails):
     filepath = os.path.join(details.file_working_dir, details.filename)
     moveRequiredContent(details.file_working_dir, details.file_working_dir, details)
+    os.remove(filepath)

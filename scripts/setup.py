@@ -1,5 +1,5 @@
 # Imports
-from download import downloadDependency, handleSubmodules
+from download import downloadDependency, isVulkanPresent
 from libfile import HandleDetails, handleZip, handleExe, handleOtherFiles, getFileName
 from shared import AnsiColors
 from typing import List
@@ -27,12 +27,14 @@ IS_64BIT = sys.maxsize > 2**32
 CONFIG_PATH = "./config/dependencies.config.toml"
 
 def finalizePath(path, lib_version, lib_cxx = ""):
+    if lib_cxx is None:
+        lib_cxx = ""
     tmp = path
-    if "{version}" in tmp:
+    if "{version}" in tmp and lib_version is not None:
         tmp = tmp.replace("{version}", lib_version)
-    if "{operating_system}" in tmp:
+    if "{operating_system}" in tmp and OP_SYSTEM is not None:
         tmp = tmp.replace("{operating_system}", OP_SYSTEM.lower())
-    if "{compiler}" in tmp:
+    if "{compiler}" in tmp and lib_cxx is not None:
         tmp = tmp.replace("{compiler}", lib_cxx)
     return tmp
 
@@ -50,11 +52,11 @@ def platformSizeSelect():
 def versionSelect(lib_name, avail_versions):
     if (len(avail_versions) == 1):
         return avail_versions[0]
-    print(f"{AnsiColors.CYAN}Please select a library version for {AnsiColors.YELLOW}{lib_name}{AnsiColors.CYAN} to install")
+    print(f"{AnsiColors.CYAN}Please select a library version for {AnsiColors.YELLOW}{lib_name}{AnsiColors.CYAN} to install{AnsiColors.DEFAULT}")
     while (True):
         selection = input(f"Options: {AnsiColors.YELLOW}{*avail_versions,}{AnsiColors.DEFAULT} > ")
         if (selection not in avail_versions):
-            print(f"{AnsiColors.RED}Invalid option... Please select again ([ctrl + c] to exit installation)")
+            print(f"{AnsiColors.RED}Invalid option... Please select again ([ctrl + c] to exit installation){AnsiColors.DEFAULT}")
         else:
             return selection
 
@@ -62,40 +64,24 @@ def handleDownloadedFiles(file_details: HandleDetails):
         file_len = len(file_details.filename)
         extension = file_details.filename[file_len-4:file_len]
         if (".zip" in extension):
-            handleZip(
-                file_details.file_working_dir,
-                file_details.filename,
-                file_details.directory,
-                file_details.include,
-                file_details.lib,
-                file_details.src)
+            handleZip(file_details)
         elif(".exe" in extension):
-            handleExe(
-                file_details.file_working_dir,
-                file_details.filename,
-                file_details.directory,
-                file_details.include,
-                file_details.lib,
-                file_details.src)
+            handleExe(file_details)
         else:
-            handleOtherFiles(
-                file_details.file_working_dir,
-                file_details.filename,
-                file_details.directory,
-                file_details.include,
-                file_details.lib,
-                file_details.src)
+            handleOtherFiles(file_details)
 
 
-def processVendorLibs(libs, base_path: str):
+def processVendorLibs(compiler, platform, libs, base_path: str):
     for library in libs:
-        lib_name = library["name"]
+        lib_name: str = library["name"]
         if (os.path.exists(os.path.join(base_path,lib_name)) and len(os.listdir(os.path.join(base_path,lib_name))) != 0):
-            print(f"{AnsiColors.YELLOW}\t{lib_name}{AnsiColors.CYAN} directory already exists and is non-empty.")
+            print(f"{AnsiColors.YELLOW}\t{lib_name}{AnsiColors.CYAN} directory already exists and is non-empty.{AnsiColors.DEFAULT}")
             continue
-        print(f"{AnsiColors.CYAN}\tProcessing {AnsiColors.YELLOW}{lib_name}{AnsiColors.CYAN} dependency.")
+        print(f"{AnsiColors.CYAN}\tProcessing {AnsiColors.YELLOW}{lib_name}{AnsiColors.CYAN} dependency.{AnsiColors.DEFAULT}")
         lib_url = library["url"]
         lib_version = versionSelect(lib_name, library["versions"])
+        if lib_name.casefold() == "vulkan".casefold() and isVulkanPresent():
+            continue
         lib_cxx_name = None
         lib_platform = None
         if (compiler in library):
@@ -104,7 +90,9 @@ def processVendorLibs(libs, base_path: str):
                 lib_platform = library[compiler][platform]
         f_url = finalizePath(lib_url, lib_version, lib_cxx_name)
         download_dir = os.path.join(base_path, lib_name)
-        downloadDependency(lib_name, f_url, download_dir)
+        installed = downloadDependency(lib_name, f_url, download_dir)
+        if not installed:
+            continue
         filename = getFileName(f_url)
         curr_file_details = HandleDetails(filename, download_dir)
         if lib_platform is not None:
@@ -120,7 +108,7 @@ def processIncludeLibs(libs, base_path: str):
     for library in libs:
         lib_name = library["name"]
         if (os.path.exists(os.path.join(base_path,lib_name)) and len(os.listdir(os.path.join(base_path,lib_name))) != 0):
-            print(f"{AnsiColors.YELLOW}\t{lib_name}{AnsiColors.CYAN} directory already exists and is non-empty.")
+            print(f"{AnsiColors.YELLOW}\t{lib_name}{AnsiColors.CYAN} directory already exists and is non-empty.{AnsiColors.DEFAULT}")
             continue
         lib_url = library["url"]
         commits = None
@@ -153,7 +141,7 @@ def parseVendors(compiler, platform, config_data):
         path = os.path.join(curr_dir, "extern", path)
     print(f"{AnsiColors.GREEN}Creating directory: {path}.")
     os.makedirs(path, exist_ok=True)
-    processVendorLibs(config_data["external"]["vendor"]["libraries"], path)
+    processVendorLibs(compiler, platform, config_data["external"]["vendor"]["libraries"], path)
 
 def parseSrcIncludes(compiler, platform, config_data):
     ext_inc_dir: dict = config_data["external"]["include"]["directory"]
@@ -185,7 +173,6 @@ def startProcess(libs: str = 'all', compiler = None, platform = None):
     if libs == 'all' or libs == 'vendor':
         parseVendors(compiler, platform, data)
     if libs == 'all' or libs == 'include':
-        handleSubmodules()
         parseSrcIncludes(compiler, platform, data)
 
 try:
@@ -201,7 +188,7 @@ try:
             libs = args.libs
         startProcess(libs, compiler, platform)
 except argparse.ArgumentError:
-    print(f"{AnsiColors.RED}Invalid command line argument provided: {parser.error}")
+    print(f"{AnsiColors.RED}Invalid command line argument provided: {parser.error}{AnsiColors.DEFAULT}")
 except argparse.ArgumentTypeError:
-    print(f"{AnsiColors.RED}Invalid command line argument type provided: {parser.error}")
+    print(f"{AnsiColors.RED}Invalid command line argument type provided: {parser.error}{AnsiColors.DEFAULT}")
 
