@@ -133,13 +133,28 @@ project "CzenginePlusPlus"
     linkoptions { table.concat(link_list, " ") .. " -std=c++23" }
     includedirs { table.unpack(include_list) }
     files {"**.hpp","**.h","**.cpp"}
-    removefiles { 
+    removefiles {
         "extern/__vendor__/**/*.cpp", 
         "extern/__vendor__/**/*.c",
         "extern/__include__/PugiXml/tests/*.cpp",
         "extern/__include__/PugiXml/docs/**/*.cpp",
         "extern/__include__/DearImGui/examples/**.cpp",
-        "extern/__include__/DearImGui/misc/**/*.cpp"
+        "extern/__include__/DearImGui/misc/**/*.cpp",
+        "extern/__include__/DearImGui/backends/*allegro5.cpp", -- Remove DearImGui Backends not being used.
+        "extern/__include__/DearImGui/backends/*android.cpp",
+        "extern/__include__/DearImGui/backends/*dx10.cpp",
+        "extern/__include__/DearImGui/backends/*dx11.cpp",
+        "extern/__include__/DearImGui/backends/*dx12.cpp",
+        "extern/__include__/DearImGui/backends/*dx9.cpp",
+        "extern/__include__/DearImGui/backends/*glfw.cpp",
+        "extern/__include__/DearImGui/backends/*opengl*.cpp",
+        "extern/__include__/DearImGui/backends/*glut.cpp",
+        "extern/__include__/DearImGui/backends/*metal.cpp",
+        "extern/__include__/DearImGui/backends/*osx.h",
+        "extern/__include__/DearImGui/backends/*sdl3.cpp",
+        "extern/__include__/DearImGui/backends/*sdlrenderer3.cpp",
+        "extern/__include__/DearImGui/backends/*wgpu.cpp",
+        "extern/__include__/DearImGui/backends/*win32.cpp"
     }
     buildoptions "-std=c++23"
     filter "files:**"
