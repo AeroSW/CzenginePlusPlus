@@ -130,7 +130,7 @@ project "CzenginePlusPlus"
     print(dump(link_list))
 
     libdirs { table.unpack(lib_list) }
-    linkoptions { table.concat(link_list, " ") .. " -std=c++23" }
+    linkoptions { table.concat(link_list, " ") .. " -std=c++23 -mwindows" }
     includedirs { table.unpack(include_list) }
     files {"**.hpp","**.h","**.cpp"}
     removefiles {
@@ -156,10 +156,10 @@ project "CzenginePlusPlus"
         "extern/__include__/DearImGui/backends/*wgpu.cpp",
         "extern/__include__/DearImGui/backends/*win32.cpp"
     }
-    buildoptions "-std=c++23"
+    buildoptions "-std=c++23 -mwindows"
     filter "files:**"
     buildcommands {
-        "make %{cfg.buildcfg}",
+        "make %{cfg.buildcfg} -mwindow",
         "cp -rf czengine-interface/ \"%[bin/project.config]\"",
     }
     rebuildcommands {
@@ -169,8 +169,7 @@ project "CzenginePlusPlus"
         "make clean ${cfg.buildcfg}"
     }
     postbuildcommands {
-        "cp -rf czengine-interface/ \"%[bin/project.config]\"",
-        "ECHO \"Hello World\""
+        "cp -rf czengine-interface/ \"%[bin/project.config]\""
     }
     filter "configurations:Debug"
         defines {"DEBUG"}
