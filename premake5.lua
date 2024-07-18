@@ -96,31 +96,31 @@ project "CzenginePlusPlus"
     local lib_list = {}
     local include_list = { 
         "./include/**",
-        "./extern/DearImGui/include",
-        "./extern/DearImGui/include/**",
-        "./extern/PugiXml/include",
-        "./extern/toml++/include",
-        "./extern/toml++/include/**"
+        "./extern/__include__/DearImGui/",
+        "./extern/__include__/DearImGui/**",
+        "./extern/__include__/PugiXml/src",
+        "./extern/__include__/Toml++/include",
+        "./extern/__include__/Toml++/include/**"
     }
     local link_list = {}
 
     -- Add external libraries...  TODO: Adjust to list and for-loop
     extern_libs_with_include_folder = { "SDL2", "SDL2_ttf"}
     for _, extern_lib in ipairs(extern_libs_with_include_folder) do
-        lib_list = addLib(lib_list, "./lib", extern_lib)
-        include_list = addInclude(include_list, "./lib", extern_lib, "include/**")
-        link_list = addDlls(link_list, "./lib", extern_lib, extern_lib .. ".dll")
+        lib_list = addLib(lib_list, "./extern/__vendor__", extern_lib)
+        include_list = addInclude(include_list, "./extern/__vendor__", extern_lib, "include/**")
+        link_list = addDlls(link_list, "./extern/__vendor__", extern_lib, extern_lib .. ".dll")
     end
     extern_libs_with_Include_folder = {"Vulkan"}
     for _, extern_lib in ipairs(extern_libs_with_Include_folder) do
         --table.insert(lib_list, "lib/Vulkan/Lib/vulkan-1")
         --lib_list = addLib(lib_list, "./lib", extern_lib)
-        include_list = addInclude(include_list, "./lib", extern_lib, "Include")
+        include_list = addInclude(include_list, "./extern/__vendor__", extern_lib, "Include")
         table.insert(lib_list, "./lib/Vulkan/Bin")
         --link_list = addDlls(link_list, "./lib", extern_lib, extern_lib .. ".dll")
     end
 
-    links { "lib/Vulkan/Lib/vulkan-1" }
+    links { "./extern/__vendor__/Vulkan/Lib/vulkan-1" }
 
     print("lib dump")
     print(dump(lib_list))
@@ -133,7 +133,14 @@ project "CzenginePlusPlus"
     linkoptions { table.concat(link_list, " ") .. " -std=c++23" }
     includedirs { table.unpack(include_list) }
     files {"**.hpp","**.h","**.cpp"}
-    removefiles { "lib/**/*.cpp", "lib/**/*.c" }
+    removefiles { 
+        "extern/__vendor__/**/*.cpp", 
+        "extern/__vendor__/**/*.c",
+        "extern/__include__/PugiXml/tests/*.cpp",
+        "extern/__include__/PugiXml/docs/**/*.cpp",
+        "extern/__include__/DearImGui/examples/**.cpp",
+        "extern/__include__/DearImGui/misc/**/*.cpp"
+    }
     buildoptions "-std=c++23"
     filter "files:**"
     buildcommands {
