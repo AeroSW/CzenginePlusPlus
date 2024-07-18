@@ -44,3 +44,6 @@ CzenginePlusPlus.make
 /obj
 /lib
 /scripts/__pycache__
+/extern
+!extern/__include__/DearImGui
+!extern/__include__/PugiXml

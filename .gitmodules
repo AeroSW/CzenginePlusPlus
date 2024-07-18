@@ -1,0 +1,7 @@
+[submodule "extern/__include__/PugiXml"]
+	path = extern/__include__/PugiXml
+	url = https://github.com/AeroSW/czengine-pugixml.git
+[submodule "extern/__include__/DearImGui"]
+	path = extern/__include__/DearImGui
+	url = https://github.com/AeroSW/czengine-imgui.git
+	branch = docking

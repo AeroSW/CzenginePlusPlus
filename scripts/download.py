@@ -46,11 +46,21 @@ def downloadDependency(lib_name: str, lib_url: str, lib_dir: str):
     install_app = input(f'{AnsiColors.BLUE}Would you like to install {AnsiColors.YELLOW}{lib_name}{AnsiColors.BLUE} from {AnsiColors.YELLOW}{lib_url}{AnsiColors.BLUE}?{AnsiColors.DEFAULT}\n\t("y", "n") > ')
     filename = getFileName(lib_url)
     if (install_app.casefold() != 'y' and install_app.casefold() != 'yes'):
-        return
+        return False
     try:
-        os.makedirs(lib_dir, exist_ok=False)
+        os.makedirs(lib_dir, exist_ok=True)
         handleDownload(os.path.join(lib_dir, filename), lib_url)
+        return True
     except OSError:
-        print(f"{AnsiColors.RED}Temp directory, [{lib_dir}], should not exist.")
+        print(f"{AnsiColors.RED}Failed to create [{lib_dir}].{AnsiColors.DEFAULT}")
         exit()
 
+def isVulkanPresent(lib_version):
+    vulkan_sdk = os.environ.get("VULKAN_SDK")
+    if vulkan_sdk is None:
+        return False
+    print(f"{AnsiColors.GREEN}Vulkan install detected.{AnsiColors.DEFAULT}")
+    if lib_version not in vulkan_sdk:
+        print(f"{AnsiColors.CYAN}Vulkan version mismatch. Proceeding.{AnsiColors.DEFAULT}")
+        return False
+    return True
