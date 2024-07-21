@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "sdl-window.hpp"
+#include "czengine.hpp"
 #include "inttypes.hpp"
 
 namespace CzaraEngine {
@@ -12,11 +12,12 @@ namespace CzaraEngine {
     struct WindowConfig {
         ui32 width = 800;
         ui32 height = 640;
-        ui32 x_window_offset = SdlWindow::X_CENTER;
-        ui32 y_window_offset = SdlWindow::Y_CENTER;
+        ui32 x_window_offset = GLOBAL_X_CENTER;
+        ui32 y_window_offset = GLOBAL_Y_CENTER;
     };
     struct RenderConfig {
-        std::string api = "Vulkan";
+        std::string api = "VULKAN";
+        std::string device = "";
     };
     struct LogFileConstraints {
         ui64 amount;

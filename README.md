@@ -32,12 +32,9 @@ The project is using Dear ImGui for implementing an interface, and I'm utilizing
 1) Currently Premake5 and makefiles  build with `--debug` flag, so output of executable will be in `bin/Win64/Debug`
 
 ## TODO
-- [x] Start on Python3 install script
-- [x] Update Python install script to kick off executable install (for Vulkan)
-- [x] Add instructions to Python script to parse and download libraries belonging to `/extern/` directory.
 - [ ] Implement Vulkan Render APIs for SDL2 and Dear ImGui
 - [ ] Start writing unit tests for key features
-- [x] Restructure Czengine to be Git Repo with Sub Repos rather than one large repo.
 - [ ] Integrate Linear Math library (most likely Eigen)
 - [ ] Work on Render Pipeline
 - [ ] Replace usage of `build.sh` with another Python script/flag
+- [ ] Add installs for Python and Premake5

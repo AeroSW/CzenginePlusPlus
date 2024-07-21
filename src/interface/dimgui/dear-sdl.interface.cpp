@@ -1,19 +1,19 @@
-#include "dimgui-interface.hpp"
+#include "dear-sdl.interface.hpp"
 #include <iostream>
 
 #include "backends/imgui_impl_sdl2.h"
 
 namespace CzaraEngine {
     
-    DearImGuiInterface::DearImGuiInterface(std::shared_ptr<SdlWindowWrapper> &window, std::shared_ptr<SdlRendererWrapper> &renderer) :
-    Interface(), m_sdl_initialized(false), m_window(window), m_renderer(renderer) {
+    DearImGuiInterface::DearImGuiInterface(std::shared_ptr<SDL_Window> &window, std::shared_ptr<SDL_Renderer> &renderer, std::function<bool(DearImGuiInterface&)> guard) :
+    Interface(), m_sdl_initialized(false), m_window(window), m_renderer(renderer), m_guard(guard) {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io{ImGui::GetIO()};
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        sdlGuard();
+        m_guard(*this);
     }
     DearImGuiInterface::~DearImGuiInterface() {
         ImGui_ImplSDLRenderer2_Shutdown();
@@ -27,20 +27,21 @@ namespace CzaraEngine {
         m_components.insert(m_components.end(), components.begin(), components.end());
     }
     void DearImGuiInterface::newFrame() {
-        if (sdlGuard()) return;
+        if (m_guard(*this)) return;
         ImGui_ImplSDLRenderer2_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
     }
     void DearImGuiInterface::render() {
-        if (sdlGuard()) return;
+        if (m_guard(*this)) return;
         ImGui::Render();
     }
     void DearImGuiInterface::draw() {
-        if (sdlGuard()) return;
+        if (m_guard(*this)) return;
+        std::shared_ptr<SDL_Renderer> renderer = m_renderer.lock();
         ImGui_ImplSDLRenderer2_RenderDrawData(
             ImGui::GetDrawData(),
-            m_renderer->get()
+            renderer.get()
         );
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
@@ -51,15 +52,7 @@ namespace CzaraEngine {
         }
     }
     void DearImGuiInterface::processEvent(SDL_Event &event) {
-        if (sdlGuard()) return;
+        if (m_guard(*this)) return;
         ImGui_ImplSDL2_ProcessEvent(&event);
-    }
-    bool DearImGuiInterface::sdlGuard() {
-        if (m_sdl_initialized) return false;
-        if (!m_renderer->get()) return true;
-        ImGui_ImplSDL2_InitForSDLRenderer(m_window->get(), m_renderer->get());
-        ImGui_ImplSDLRenderer2_Init(m_renderer->get());
-        m_sdl_initialized = true;
-        return false;
     }
 }
