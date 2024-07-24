@@ -5,6 +5,8 @@
 #include "inttypes.hpp"
 
 namespace CzaraEngine {
+    ui32& getCenterXPos();
+    ui32& getCenterYPos();
     struct FileConfig {
         std::string name;
         std::string directory;
@@ -12,11 +14,11 @@ namespace CzaraEngine {
     struct WindowConfig {
         ui32 width = 800;
         ui32 height = 640;
-        ui32 x_window_offset = GLOBAL_X_CENTER;
-        ui32 y_window_offset = GLOBAL_Y_CENTER;
+        ui32 x_window_offset = getCenterXPos();
+        ui32 y_window_offset = getCenterYPos();
     };
     struct RenderConfig {
-        std::string api = "VULKAN";
+        std::string api = "Vulkan";
         std::string device = "";
     };
     struct LogFileConstraints {

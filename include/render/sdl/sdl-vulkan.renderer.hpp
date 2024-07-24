@@ -5,7 +5,7 @@
 
 #include <SDL.h>
 #include <SDL_vulkan.h>
-#include <vulkan_core.h>
+#include "vulkan/vulkan.h"
 
 #include <memory>
 #include <string>
@@ -57,4 +57,4 @@ namespace CzaraEngine {
     };
 }
 
-BIND_RENDERER(VULKAN, CzaraEngine::SdlVulkanRenderer, const std::shared_ptr<SDL_Window>&, const std::string&);
+BIND_RENDERER(Vulkan, CzaraEngine::SdlVulkanRenderer, const std::shared_ptr<SDL_Window>&, const std::string&);

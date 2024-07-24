@@ -4,16 +4,19 @@
 #include <assert.h>
 
 namespace CzaraEngine {
-    SdlVulkanRenderer::SdlVulkanRenderer(const std::shared_ptr<SdlWindowWrapper> &window, const std::string &dev_name) :
+    // A lot of this code is transcribed from Dear ImGui's SDL2 + Vulkan example.
+    SdlVulkanRenderer::SdlVulkanRenderer(const std::shared_ptr<SDL_Window> &window, const std::string &dev_name) :
         Renderer(dev_name), m_window(window), m_extensions(), m_allocator() {
         
         ui32 ext_count = 0;
-        SDL_Vulkan_GetInstanceExtensions(m_window->get(), &ext_count, nullptr);
+        SDL_Vulkan_GetInstanceExtensions(window.get(), &ext_count, nullptr);
         m_extensions.resize(ext_count);
-        SDL_Vulkan_GetInstanceExtensions(m_window->get(), &ext_count, m_extensions.data());
+        SDL_Vulkan_GetInstanceExtensions(window.get(), &ext_count, m_extensions.data());
         setup();
     }
-    SdlVulkanRenderer::~SdlVulkanRenderer() {}
+    SdlVulkanRenderer::~SdlVulkanRenderer() {
+        cleanup();
+    }
     void SdlVulkanRenderer::handleErr(const VkResult &err) {
         if (err == 0) return;
         Logger::err_log() << "Vulkan Error: VkResult: " << err << endl;
@@ -21,6 +24,14 @@ namespace CzaraEngine {
             std::exit(1);
         }
     }
+    SDL_WindowFlags SdlVulkanRenderer::getFlag() {
+        return SDL_WINDOW_VULKAN;
+    }
+
+    void SdlVulkanRenderer::render() {}
+    void SdlVulkanRenderer::clearRenderBuffer() {}
+    void SdlVulkanRenderer::drawColorRgb(const ui8 &red, const ui8 &green, const ui8 &blue, const ui8 &alpha) {}
+
     bool SdlVulkanRenderer::isExtensionAvailable(const std::vector<VkExtensionProperties> &ext_props, const std::string &extension) {
         for (const VkExtensionProperties& props : ext_props) {
             if (strcmp(props.extensionName, extension.c_str())) {
@@ -124,9 +135,9 @@ namespace CzaraEngine {
         }
         m_curr_gpu = m_gpus[0];
         for (VkPhysicalDevice& dev : m_gpus) {
-            VkPhysicalDeviceProperties2 dev_props;
-            vkGetPhysicalDeviceProperties2(dev, &dev_props);
-            if (dev_props.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+            VkPhysicalDeviceProperties dev_props;
+            vkGetPhysicalDeviceProperties(dev, &dev_props);
+            if (dev_props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
                 m_curr_gpu = dev;
                 break;
             }
@@ -136,8 +147,5 @@ namespace CzaraEngine {
         vkDestroyDescriptorPool(m_device, m_descriptor_pool, m_allocator.get());
         vkDestroyDevice(m_device, m_allocator.get());
         vkDestroyInstance(m_instance, m_allocator.get());
-    }
-    SDL_WindowFlags SdlVulkanRenderer::getFlag() {
-        return SDL_WINDOW_VULKAN;
     }
 }

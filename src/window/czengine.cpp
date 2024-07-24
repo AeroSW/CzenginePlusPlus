@@ -2,8 +2,6 @@
 
 #include "app-logs.hpp"
 #include "inttypes.hpp"
-#include "czengine-config-parser.hpp"
-#include "czengine-ux-file-parser.hpp"
 #include "event-queue.hpp"
 #include "sdl-renderer-binding-factory.hpp"
 
@@ -59,8 +57,8 @@ namespace CzaraEngine {
             m_renderer->drawColorRgb(100, 100, 100, 255);
             SDL_Event sdl_event;
             while(SDL_PollEvent(&sdl_event) > 0) {
-                for (Interface &interface : m_interfaces) {
-                    interface.processEvent(sdl_event);
+                for (std::shared_ptr<Interface> &interface : m_interfaces) {
+                    interface->processEvent(sdl_event);
                 }
                 switch (sdl_event.type) {
                     case SDL_WINDOWEVENT:
@@ -73,11 +71,11 @@ namespace CzaraEngine {
                 }
             }
             m_renderer->clearRenderBuffer();
-            for (Interface &interface : m_interfaces) {
-                interface.newFrame();
-                interface.drawInterface();
-                interface.render();
-                interface.draw();
+            for (std::shared_ptr<Interface> &interface : m_interfaces) {
+                interface->newFrame();
+                interface->drawInterface();
+                interface->render();
+                interface->draw();
             }
             // Based on Documentation, SDL uses a back renderer. (Renders at the end of its workflow.)
             m_renderer->render();
@@ -88,7 +86,7 @@ namespace CzaraEngine {
         return sustain;
     }
 
-    void Czengine::addInterface(const Interface &interface) {
+    void Czengine::addInterface(const std::shared_ptr<Interface> &interface) {
         m_interfaces.push_back(interface);
     }
 
@@ -96,7 +94,7 @@ namespace CzaraEngine {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.c_str(), msg.c_str(), NULL);
     }
 
-    std::shared_ptr<SDL_Window>& createWindow(const CzengineAppConfig &config) {
+    std::shared_ptr<SDL_Window> createWindow(const CzengineAppConfig &config) {
         std::shared_ptr<SDL_Window> window{
             SDL_CreateWindow(
                 config.title.c_str(), 
@@ -108,13 +106,19 @@ namespace CzaraEngine {
         };
         return window;
     }
-    std::shared_ptr<Renderer>& createRenderer(const CzengineAppConfig &config, const std::weak_ptr<SDL_Window> &wwindow) {
+    std::shared_ptr<Renderer> createRenderer(const CzengineAppConfig &config, const std::weak_ptr<SDL_Window> &wwindow) {
         std::shared_ptr<SDL_Window> swindow = wwindow.lock();
         std::shared_ptr<Renderer> renderer{
             SdlRendererBindingFactory::createRenderer(config.render.api, swindow, config.render.device)
         };
+        return renderer;
     }
-
-    // const ui32 GLOBAL_X_CENTER = SDL_WINDOWPOS_CENTERED;
-    // const ui32 GLOBAL_Y_CENTER = SDL_WINDOWPOS_CENTERED;
+    ui32& getCenterXPos() {
+        static ui32 GLOBAL_X_CENTER = SDL_WINDOWPOS_CENTERED;
+        return GLOBAL_X_CENTER;
+    }
+    ui32& getCenterYPos() {
+        static ui32 GLOBAL_Y_CENTER = SDL_WINDOWPOS_CENTERED;
+        return GLOBAL_Y_CENTER;
+    }
 }

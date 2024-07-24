@@ -16,6 +16,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
     }
 
     Czengine engine{config_manager.getAppConfig()};
+    engine.sustainEventLoop();
 
     return 0;
 }

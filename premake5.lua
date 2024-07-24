@@ -69,7 +69,8 @@ project "CzenginePlusPlus"
         "./extern/__include__/DearImGui/**",
         "./extern/__include__/PugiXml/src",
         "./extern/__include__/Toml++/include",
-        "./extern/__include__/Toml++/include/**"
+        "./extern/__include__/Toml++/include/**",
+        "./extern/__vendor__/Vulkan/Include/**"
     }
     local link_list = {}
 
@@ -77,7 +78,7 @@ project "CzenginePlusPlus"
     extern_libs_with_include_folder = { "SDL2", "SDL2_ttf"}
     for _, extern_lib in ipairs(extern_libs_with_include_folder) do
         lib_list = addLib(lib_list, "./extern/__vendor__", extern_lib)
-        include_list = addInclude(include_list, "./extern/__vendor__", extern_lib, "include/**")
+        --include_list = addInclude(include_list, "./extern/__vendor__", extern_lib, "include/**")
         link_list = addDlls(link_list, "./extern/__vendor__", extern_lib, extern_lib .. ".dll")
     end
     extern_libs_with_Include_folder = {"Vulkan"}

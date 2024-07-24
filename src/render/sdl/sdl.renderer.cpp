@@ -1,7 +1,10 @@
 #include "sdl.renderer.hpp"
 
+#include "exception.hpp"
+#include "SDL.h"
+
 namespace CzaraEngine {
-    Sdl2Renderer::Sdl2Renderer(const std::string &dev_name, const std::shared_ptr<SDL_Window> &window):
+    Sdl2Renderer::Sdl2Renderer(const std::shared_ptr<SDL_Window> &window, const std::string &dev_name):
         Renderer(dev_name), m_window(window),
         m_instance(
             SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE),
@@ -26,7 +29,7 @@ namespace CzaraEngine {
     void Sdl2Renderer::render() {
         SDL_RenderPresent(m_instance.get());
     }
-    std::shared_ptr<DearImGuiInterface> Sdl2Renderer::getInterface() {
-        return std::make_shared<DearImGuiInterface>()
+    void Sdl2Renderer::drawColorRgb(const ui8 &red, const ui8 &green, const ui8 &blue, const ui8 &alpha) {
+        SDL_SetRenderDrawColor(m_instance.get(), red, green, blue, alpha);
     }
 }
