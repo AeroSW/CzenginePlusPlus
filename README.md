@@ -27,13 +27,14 @@ The project is using Dear ImGui for implementing an interface, and I'm utilizing
 1) Install Python 3.12 (No additional libraries should be needed.)
 1) Execute `python czengine.py` and follow text prompts.
 1) Open bash window and execute `./build.sh --build`
-   - This should execute `premake5 gmake2` and `make CXX=g++`
+   - This should execute `premake5 gmake2` and `make CXX=g++` (I have a symlink for MinGW's `mingw32-make` to `make.exe`)
 1) Ensure Vulkan library can be found by Premake5's makefiles
 1) Currently Premake5 and makefiles  build with `--debug` flag, so output of executable will be in `bin/Win64/Debug`
 
 ## TODO
-- [ ] Implement Vulkan Render APIs for SDL2 and Dear ImGui
-- [ ] Start writing unit tests for key features
+- [X] Implement Vulkan Render APIs for SDL2 and Dear ImGui
+- [ ] Review Dear ImGui Vulkan Implementation.  (I should be able to pull windows out of window.) <---- Next task(s)
+- [ ] Start writing unit tests for key features <---- Next task(s)
 - [ ] Integrate Linear Math library (most likely Eigen)
 - [ ] Work on Render Pipeline
 - [ ] Replace usage of `build.sh` with another Python script/flag
