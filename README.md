@@ -27,7 +27,7 @@ The project is using Dear ImGui for implementing an interface, and I'm utilizing
 1) Install Python 3.12 (No additional libraries should be needed.)
 1) Execute `python czengine.py` and follow text prompts.
 1) Open bash window and execute `./build.sh --build`
-   - This should execute `premake5 gmake2` and `make CXX=g++` (I have a symlink for MinGW's `mingw32-make` to `make.exe`)
+   - This should execute `premake5 gmake2` and `make CXX=g++` (I have a symlink for MinGW's `mingw32-make.exe` to `make.exe`.  I'll use original name when I migrate `build.sh` into a Python script)
 1) Ensure Vulkan library can be found by Premake5's makefiles
 1) Currently Premake5 and makefiles  build with `--debug` flag, so output of executable will be in `bin/Win64/Debug`
 
