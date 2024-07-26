@@ -1,6 +1,6 @@
 #include "czengine-config-parser.hpp"
 #include "log-utils.hpp"
-#include "sdl-window.hpp"
+#include "czengine.hpp"
 #include <assert.h>
 #include <memory>
 #include <sstream>
@@ -36,19 +36,19 @@ namespace CzaraEngine {
         } catch (const toml::parse_error &err) {
             std::ostringstream err_out;
             err_out << "Failed to parse application config.\n" << err << std::endl;
-            SdlWindow::showErrorMessageBox("Czengine Config Alert", err_out.str().c_str());
+            showErrorMessageBox("Czengine Config Alert", err_out.str().c_str());
             std::exit(1);
         }
         std::map<std::string, LogFileConfig> log_file_configs = processLogFileConfigs();
         if (log_file_configs.size() != 3) {
             std::ostringstream err_out;
             err_out << "Malformed log list.  Should have 3 Log Files, [application], [error], and [file].\nSize: " << log_file_configs.size() << std::endl;
-            SdlWindow::showErrorMessageBox("Czengine Config Alert", err_out.str().c_str());
+            showErrorMessageBox("Czengine Config Alert", err_out.str().c_str());
             std::exit(1);
         }
         m_config->title = m_table["application"]["title"].value_or("Czengine++");
         m_config->author = m_table["application"]["author"].value_or("AeroCzara");
-        m_config->interface = processUxFileConfig();
+        m_config->ux = processUxFileConfig();
         m_config->application_log = log_file_configs["application"];
         m_config->error_log = log_file_configs["error"];
         m_config->file_log = log_file_configs["file"];
@@ -67,7 +67,7 @@ namespace CzaraEngine {
         if (toml::array *logs_array = m_table["logging"]["logs"].as_array()) {
             for (toml::node& log_node : *logs_array) {
                 if (!log_node.is_table()) {
-                    SdlWindow::showErrorMessageBox("Czengine Config Alert", "Malformed log config in TOML.  It should be a [table].");
+                    showErrorMessageBox("Czengine Config Alert", "Malformed log config in TOML.  It should be a [table].");
                     std::exit(1);
                 }
                 toml::table& log = *log_node.as_table();
