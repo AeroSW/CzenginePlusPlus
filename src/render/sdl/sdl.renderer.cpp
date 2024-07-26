@@ -32,4 +32,7 @@ namespace CzaraEngine {
     void Sdl2Renderer::drawColorRgb(const ui8 &red, const ui8 &green, const ui8 &blue, const ui8 &alpha) {
         SDL_SetRenderDrawColor(m_instance.get(), red, green, blue, alpha);
     }
+    std::shared_ptr<SDL_Renderer> Sdl2Renderer::getSdlRenderer() {
+        return m_instance;
+    }
 }

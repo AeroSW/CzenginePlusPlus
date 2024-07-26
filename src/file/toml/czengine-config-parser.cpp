@@ -48,7 +48,7 @@ namespace CzaraEngine {
         }
         m_config->title = m_table["application"]["title"].value_or("Czengine++");
         m_config->author = m_table["application"]["author"].value_or("AeroCzara");
-        m_config->interface = processUxFileConfig();
+        m_config->ux = processUxFileConfig();
         m_config->application_log = log_file_configs["application"];
         m_config->error_log = log_file_configs["error"];
         m_config->file_log = log_file_configs["file"];

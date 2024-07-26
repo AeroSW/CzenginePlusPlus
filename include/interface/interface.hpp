@@ -6,9 +6,9 @@
 #include "SDL.h"
 
 namespace CzaraEngine {
-    class Interface {
+    class CzengineInterface {
         public:
-            virtual ~Interface() {}
+            virtual ~CzengineInterface() {}
             virtual void addComponent(std::shared_ptr<Component> &component) = 0;
             virtual void addComponents(std::vector<std::shared_ptr<Component>> &components) = 0;
             virtual void newFrame() = 0;
@@ -17,6 +17,6 @@ namespace CzaraEngine {
             virtual void drawInterface() = 0;
             virtual void processEvent(const SDL_Event &event) = 0;
         protected:
-            Interface();
+            CzengineInterface();
     };
 }

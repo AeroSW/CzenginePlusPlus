@@ -1,58 +1,55 @@
 #include "dear-sdl.interface.hpp"
+#include "utility.hpp"
 #include <iostream>
 
 #include "backends/imgui_impl_sdl2.h"
 
 namespace CzaraEngine {
     
-    DearImGuiInterface::DearImGuiInterface(std::shared_ptr<SDL_Window> &window, std::shared_ptr<SDL_Renderer> &renderer, std::function<bool(DearImGuiInterface&)> guard) :
-    Interface(), m_sdl_initialized(false), m_window(window), m_renderer(renderer), m_guard(guard) {
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io{ImGui::GetIO()};
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        m_guard(*this);
-    }
-    DearImGuiInterface::~DearImGuiInterface() {
+    DearSdlInterface::DearSdlInterface(const std::shared_ptr<SDL_Window> &window, const std::shared_ptr<Sdl2Renderer> &renderer) :
+        DearInterface(window), m_renderer(renderer) {
+            ImGui_ImplSDL2_InitForSDLRenderer(window.get(), renderer->getSdlRenderer().get());
+        }
+    DearSdlInterface::~DearSdlInterface() {
         ImGui_ImplSDLRenderer2_Shutdown();
         ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
     }
-    void DearImGuiInterface::addComponent(std::shared_ptr<Component> &component) {
-        m_components.push_back(component);
-    }
-    void DearImGuiInterface::addComponents(std::vector<std::shared_ptr<Component>> &components) {
-        m_components.insert(m_components.end(), components.begin(), components.end());
-    }
-    void DearImGuiInterface::newFrame() {
-        if (m_guard(*this)) return;
+    void DearSdlInterface::newFrame() {
+        if (sdlGuard(this)) return;
         ImGui_ImplSDLRenderer2_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
     }
-    void DearImGuiInterface::render() {
-        if (m_guard(*this)) return;
+    void DearSdlInterface::render() {
+        if (sdlGuard(this)) return;
         ImGui::Render();
     }
-    void DearImGuiInterface::draw() {
-        if (m_guard(*this)) return;
-        std::shared_ptr<SDL_Renderer> renderer = m_renderer.lock();
+    void DearSdlInterface::draw() {
+        if (sdlGuard(this)) return;
+        std::shared_ptr<Sdl2Renderer> renderer = m_renderer.lock();
         ImGui_ImplSDLRenderer2_RenderDrawData(
             ImGui::GetDrawData(),
-            renderer.get()
+            renderer->getSdlRenderer().get()
         );
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }
-    void DearImGuiInterface::drawInterface() {
+    void DearSdlInterface::drawInterface() {
         for (std::shared_ptr<Component> component : m_components) {
             component->renderComponent();
         }
     }
-    void DearImGuiInterface::processEvent(SDL_Event &event) {
-        if (m_guard(*this)) return;
-        ImGui_ImplSDL2_ProcessEvent(&event);
+    bool DearSdlInterface::isRendererUninitialized() {
+        return isWeakPtrUnitialized(m_renderer);
+    }
+    void DearSdlInterface::initInterfaceRendering() {
+        std::shared_ptr<SDL_Window> window = m_window.lock();
+        std::shared_ptr<Sdl2Renderer> renderer = m_renderer.lock();
+        ImGui_ImplSDL2_InitForSDLRenderer(window.get(), renderer->getSdlRenderer().get());
+        ImGui_ImplSDLRenderer2_Init(renderer->getSdlRenderer().get());
+        m_sdl_initialized = true;
+    }
+    bool DearSdlInterface::isInitialized() {
+        return m_sdl_initialized;
     }
 }

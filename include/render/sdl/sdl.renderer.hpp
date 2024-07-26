@@ -17,6 +17,7 @@ namespace CzaraEngine {
             virtual void drawColorRgb(const ui8 &red, const ui8 &green, const ui8 &blue, const ui8 &alpha);
             virtual void clearRenderBuffer();
             virtual void render();
+            virtual std::shared_ptr<SDL_Renderer> getSdlRenderer();
         private:
             std::weak_ptr<SDL_Window> m_window;
             std::shared_ptr<SDL_Renderer> m_instance;

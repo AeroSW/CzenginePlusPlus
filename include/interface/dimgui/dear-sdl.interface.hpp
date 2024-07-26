@@ -1,35 +1,25 @@
 #pragma once
 
-#include "dear-helper.hpp"
-#include "interface.hpp"
+#include "dear.interface.hpp"
+#include "sdl.renderer.hpp"
 
-#include "imgui.h"
-#include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
-#include <functional>
-#include <memory>
 #include <vector>
 
 namespace CzaraEngine {
-    class Czengine;
-    class DearImGuiInterface : public Interface {
+    class DearSdlInterface : public DearInterface {
         public:
-            DearImGuiInterface(std::shared_ptr<SDL_Window> &, std::shared_ptr<SDL_Renderer> &, std::function<bool(DearImGuiInterface&)> = DearHelper::sdlGuard);
-            virtual ~DearImGuiInterface();
-            virtual void addComponent(std::shared_ptr<Component> &component);
-            virtual void addComponents(std::vector<std::shared_ptr<Component>> &components);
+            DearSdlInterface(const std::shared_ptr<SDL_Window> &, const std::shared_ptr<Sdl2Renderer> &);
+            virtual ~DearSdlInterface();
             virtual void newFrame();
             virtual void render();
             virtual void draw();
             virtual void drawInterface();
-            virtual void processEvent(SDL_Event &event);
-            friend class DearHelper;
+            virtual bool isRendererUninitialized();
+            virtual bool isInitialized();
+            virtual void initInterfaceRendering();
         protected:
-            std::weak_ptr<SDL_Window> m_window;
-            std::weak_ptr<SDL_Renderer> m_renderer;
-            std::vector<std::shared_ptr<Component>> m_components;
-            std::function<bool(DearImGuiInterface&)> m_guard;
-            bool m_sdl_initialized = false;
+            std::weak_ptr<Sdl2Renderer> m_renderer;
     };
 }

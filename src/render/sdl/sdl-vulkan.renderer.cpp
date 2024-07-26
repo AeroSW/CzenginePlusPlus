@@ -40,6 +40,33 @@ namespace CzaraEngine {
         }
         return false;
     }
+
+    const std::unique_ptr<VkAllocationCallbacks>& SdlVulkanRenderer::getAllocator() {
+        return m_allocator;
+    }
+    const VkInstance& SdlVulkanRenderer::getInstance() {
+        return m_instance;
+    }
+    const VkDevice& SdlVulkanRenderer::getDevice() {
+        return m_device;
+    }
+    const VkPhysicalDevice& SdlVulkanRenderer::getCurrentGpu() {
+        return m_curr_gpu;
+    }
+    const VkQueue& SdlVulkanRenderer::getQueue() {
+        return m_queue;
+    }
+    const ui32& SdlVulkanRenderer::getQueueFamily() {
+        return m_queue_family;
+    }
+    const VkPipelineCache SdlVulkanRenderer::getPipelineCache() {
+        return m_pipeline_cache;
+    }
+    const VkDescriptorPool SdlVulkanRenderer::getDescriptorPool() {
+        return m_descriptor_pool;
+    }
+
+
     void SdlVulkanRenderer::setup() {
         setupInstance();
         selectPhysicalDevice();
@@ -53,7 +80,7 @@ namespace CzaraEngine {
         ui32 prop_count;
         vkEnumerateInstanceExtensionProperties(nullptr, &prop_count, nullptr);
         std::vector<VkExtensionProperties> ext_props{prop_count};
-        handleErr(vkEnumerateInstanceExtensionProperties(nullptr, &prop_count, ext_props.data()));
+        SdlVulkanRenderer::handleErr(vkEnumerateInstanceExtensionProperties(nullptr, &prop_count, ext_props.data()));
 
         if (isExtensionAvailable(ext_props, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME)) {
             m_extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
@@ -64,9 +91,26 @@ namespace CzaraEngine {
                 create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
             }
         #endif
+        #ifdef APP_USE_VULKAN_DEBUG_REPORT
+            const char* layers[] = { "VK_LAYER_KHRONOS_validation" };
+            create_info.enabledLayerCount = 1;
+            create_info.ppEnabledLayerNames = layers;
+            m_extensions.push_back("VK_EXT_debug_report");
+        #endif
         create_info.enabledExtensionCount = (ui32) m_extensions.size();
         create_info.ppEnabledExtensionNames = m_extensions.data();
         handleErr(vkCreateInstance(&create_info, m_allocator.get(), &m_instance));
+        #ifdef APP_USE_VULKAN_DEBUG_REPORT
+            auto f_vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkCreateDebugReportCallbackEXT");
+            IM_ASSERT(f_vkCreateDebugReportCallbackEXT != nullptr);
+            VkDebugReportCallbackCreateInfoEXT debug_report_ci = {};
+            debug_report_ci.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+            debug_report_ci.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+            debug_report_ci.pfnCallback = debug_report;
+            debug_report_ci.pUserData = nullptr;
+            SdlVulkanRenderer::handleErr(f_vkCreateDebugReportCallbackEXT(m_instance, &debug_report_ci, m_allocator, &m_debug_report));
+            check_vk_result(err);
+        #endif
     }
     void SdlVulkanRenderer::setupLogicalDevice() {
         std::vector<const char*> device_extensions;
@@ -87,7 +131,7 @@ namespace CzaraEngine {
         create_info.pQueueCreateInfos = queue_info;
         create_info.enabledExtensionCount = (ui32) device_extensions.size();
         create_info.ppEnabledExtensionNames = device_extensions.data();
-        handleErr(vkCreateDevice(m_curr_gpu, &create_info, m_allocator.get(), &m_device));
+        SdlVulkanRenderer::handleErr(vkCreateDevice(m_curr_gpu, &create_info, m_allocator.get(), &m_device));
         vkGetDeviceQueue(m_device, m_queue_family, 0, &m_queue);
     }
     void SdlVulkanRenderer::setupDescriptorPool() {
@@ -100,7 +144,7 @@ namespace CzaraEngine {
         pool_info.maxSets = 1;
         pool_info.poolSizeCount = (ui32)(sizeof(pool_sizes) / sizeof(*(pool_sizes)));
         pool_info.pPoolSizes = pool_sizes;
-        handleErr(vkCreateDescriptorPool(m_device, &pool_info, m_allocator.get(), &m_descriptor_pool));
+        SdlVulkanRenderer::handleErr(vkCreateDescriptorPool(m_device, &pool_info, m_allocator.get(), &m_descriptor_pool));
     }
     void SdlVulkanRenderer::selectGraphicsQueueFamily() {
         ui32 queue_count;
@@ -118,13 +162,13 @@ namespace CzaraEngine {
     }
     void SdlVulkanRenderer::selectPhysicalDevice() {
         ui32 gpu_count = 0;
-        handleErr(vkEnumeratePhysicalDevices(m_instance, &gpu_count, nullptr));
+        SdlVulkanRenderer::handleErr(vkEnumeratePhysicalDevices(m_instance, &gpu_count, nullptr));
         if (gpu_count == 0) {
             Logger::err_log() << "Critical Error: No Compatible Display Devices detected." << endl;
             std::exit(1);
         }
         m_gpus.resize(gpu_count);
-        handleErr(vkEnumeratePhysicalDevices(m_instance, &gpu_count, m_gpus.data()));
+        SdlVulkanRenderer::handleErr(vkEnumeratePhysicalDevices(m_instance, &gpu_count, m_gpus.data()));
         for (VkPhysicalDevice &dev : m_gpus) {
             VkPhysicalDeviceProperties dev_props;
             vkGetPhysicalDeviceProperties(dev, &dev_props);

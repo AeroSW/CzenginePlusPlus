@@ -34,7 +34,7 @@ namespace CzaraEngine {
         std::string author;
         WindowConfig window;
         RenderConfig render;
-        FileConfig interface;
+        FileConfig ux;
         LogFileConfig application_log;
         LogFileConfig error_log;
         LogFileConfig file_log;

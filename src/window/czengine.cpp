@@ -30,7 +30,7 @@ namespace CzaraEngine {
             throw "SDL Renderer Creation Failed";
         }
         Logger::app_log() << "Starting SDL2 Event Loop." << endl;
-        sustainEventLoop();
+        //sustainEventLoop();
     }
 
     Czengine::Czengine(Czengine * window) : sustain(window->sustain),
@@ -44,7 +44,7 @@ namespace CzaraEngine {
             throw "SDL Renderer Creation Failed";
         }
         Logger::app_log() << "Starting SDL2 Event Loop." << endl;
-        sustainEventLoop();
+        //sustainEventLoop();
     }
 
     Czengine::~Czengine() {
@@ -57,7 +57,7 @@ namespace CzaraEngine {
             m_renderer->drawColorRgb(100, 100, 100, 255);
             SDL_Event sdl_event;
             while(SDL_PollEvent(&sdl_event) > 0) {
-                for (std::shared_ptr<Interface> &interface : m_interfaces) {
+                for (std::shared_ptr<CzengineInterface> &interface : m_interfaces) {
                     interface->processEvent(sdl_event);
                 }
                 switch (sdl_event.type) {
@@ -71,7 +71,7 @@ namespace CzaraEngine {
                 }
             }
             m_renderer->clearRenderBuffer();
-            for (std::shared_ptr<Interface> &interface : m_interfaces) {
+            for (std::shared_ptr<CzengineInterface> &interface : m_interfaces) {
                 interface->newFrame();
                 interface->drawInterface();
                 interface->render();
@@ -86,8 +86,16 @@ namespace CzaraEngine {
         return sustain;
     }
 
-    void Czengine::addInterface(const std::shared_ptr<Interface> &interface) {
+    void Czengine::addInterface(const std::shared_ptr<CzengineInterface> &interface) {
         m_interfaces.push_back(interface);
+    }
+
+    std::shared_ptr<SDL_Window> Czengine::getWindow() {
+        return m_window;
+    }
+
+    std::shared_ptr<Renderer> Czengine::getRenderer() {
+        return m_renderer;
     }
 
     void showErrorMessageBox(const std::string &title, const std::string &msg) {
@@ -95,15 +103,31 @@ namespace CzaraEngine {
     }
 
     std::shared_ptr<SDL_Window> createWindow(const CzengineAppConfig &config) {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
+            Logger::err_log() << "Failed to initialize SDL." << endl;
+            Logger::err_log() << "\tError: " << SDL_GetError() << endl;
+            showErrorMessageBox("Czengine Initialization Error", "Error:\n\t" + std::string(SDL_GetError()));
+            std::exit(1);
+        }
+        SDL_WindowFlags flags = (SDL_WindowFlags) (SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+        if (config.render.api == "Vulkan") {
+            flags = (SDL_WindowFlags) (SDL_WINDOW_VULKAN | flags);
+        }
         std::shared_ptr<SDL_Window> window{
             SDL_CreateWindow(
                 config.title.c_str(), 
                 config.window.x_window_offset, 
                 config.window.y_window_offset, 
                 config.window.width, 
-                config.window.height, 0),
+                config.window.height,
+                flags),
             SDL_DestroyWindow
         };
+        if (!window) {
+            Logger::err_log() << "Error: SDL_CreateWindow():" << endl << "\t" << SDL_GetError();
+            showErrorMessageBox("Czengine Initialization Error", "Error:\n\t" + std::string(SDL_GetError()));
+            std::exit(1);
+        }
         return window;
     }
     std::shared_ptr<Renderer> createRenderer(const CzengineAppConfig &config, const std::weak_ptr<SDL_Window> &wwindow) {

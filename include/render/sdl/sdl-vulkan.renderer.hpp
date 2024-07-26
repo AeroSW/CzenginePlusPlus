@@ -16,17 +16,19 @@ namespace CzaraEngine {
         public:
             SdlVulkanRenderer(const std::shared_ptr<SDL_Window> &window, const std::string &dev_name = "");
             ~SdlVulkanRenderer();
-            void handleErr(const VkResult &err);
+            static void handleErr(const VkResult &err);
             bool isExtensionAvailable(const std::vector<VkExtensionProperties> &ext_props, const std::string &extension);
             void cleanup();
             static SDL_WindowFlags getFlag();
 
-            const std::unique_ptr<VkAllocationCallbacks> getAllocator();
+            const std::unique_ptr<VkAllocationCallbacks>& getAllocator();
             const VkInstance& getInstance();
             const VkDevice& getDevice();
             const VkPhysicalDevice& getCurrentGpu();
             const VkQueue& getQueue();
             const ui32& getQueueFamily();
+            const VkPipelineCache getPipelineCache();
+            const VkDescriptorPool getDescriptorPool();
 
             virtual void render();
             virtual void clearRenderBuffer();
