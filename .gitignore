@@ -47,3 +47,4 @@ CzenginePlusPlus.make
 /extern
 !extern/__include__/DearImGui
 !extern/__include__/PugiXml
+!extern/__include__/GoogleTest

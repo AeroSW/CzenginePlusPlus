@@ -5,3 +5,6 @@
 	path = extern/__include__/DearImGui
 	url = https://github.com/AeroSW/czengine-imgui.git
 	branch = docking
+[submodule "extern/__include__/GoogleTest"]
+	path = extern/__include__/GoogleTest
+	url = https://github.com/AeroSW/googletest.git
