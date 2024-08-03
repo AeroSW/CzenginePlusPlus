@@ -49,3 +49,5 @@ imgui.ini
 !extern/__include__/PugiXml
 !extern/__include__/GoogleTest
 !extern/__include__/JoMock
+/premake5/logs
+/premake5/logs/*
