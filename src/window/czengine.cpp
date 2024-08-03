@@ -29,8 +29,6 @@ namespace CzaraEngine {
         if (!m_renderer) {
             throw "SDL Renderer Creation Failed";
         }
-        Logger::app_log() << "Starting SDL2 Event Loop." << endl;
-        //sustainEventLoop();
     }
 
     Czengine::Czengine(Czengine * window) : sustain(window->sustain),
@@ -43,8 +41,6 @@ namespace CzaraEngine {
         if (!m_renderer) {
             throw "SDL Renderer Creation Failed";
         }
-        Logger::app_log() << "Starting SDL2 Event Loop." << endl;
-        //sustainEventLoop();
     }
 
     Czengine::~Czengine() {
