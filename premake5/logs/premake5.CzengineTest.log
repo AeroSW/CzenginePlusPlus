@@ -1,0 +1,25 @@
+---------------------------------
+---------------------------------
+Premake5 build [CzenginePlusPlus]
+---------------------------------
+---------------------------------
+Linked Libraries
+---------------------------------
+{ [1] = ./extern/__vendor__/Vulkan/Bin,[2] = ./extern/__vendor__/SDL2/bin,[3] = ./extern/__vendor__/SDL2_ttf/bin,} 
+---------------------------------
+---------------------------------
+Included Library Headers
+---------------------------------
+{ [1] = ./include/**,[2] = ./extern/__include__/DearImGui/,[3] = ./extern/__include__/DearImGui/**,[4] = ./extern/__include__/PugiXml/src,[5] = ./extern/__include__/Toml++/include,[6] = ./extern/__include__/Toml++/include/**,[7] = ./extern/__vendor__/SDL2/include/**,[8] = ./extern/__vendor__/SDL2/include/SDL2/**,[9] = ./extern/__vendor__/SDL2_ttf/include/**,[10] = ./extern/__vendor__/SDL2_ttf/include/SDL2/**,[11] = ./extern/__vendor__/Vulkan/Include,[12] = ./extern/__include__/GoogleTest/googletest,[13] = ./extern/__include__/GoogleTest/googlemock,[14] = ./extern/__include__/GoogleTest/googletest/include,[15] = ./extern/__include__/GoogleTest/googlemock/include,[16] = ./extern/__include__/JoMock/jomock,} 
+---------------------------------
+---------------------------------
+Linked Static and Dynamic Libraries
+---------------------------------
+function: 0000020B6D2735D0
+---------------------------------
+---------------------------------
+Files being excluded from build
+---------------------------------
+{ [1] = ./src/run-czengine.cpp,[2] = extern/__vendor__/**/*.cpp,[3] = extern/__vendor__/**/*.c,[4] = extern/__include__/JoMock/example/*.cpp,[5] = extern/__include__/JoMock/example/**/*.cpp,[6] = extern/__include__/JoMock/vs2019_example/*.cpp,[7] = extern/__include__/JoMock/vs2019_example/**/*.cpp,[8] = extern/__include__/GoogleTest/googletest/test/*.cc,[9] = extern/__include__/GoogleTest/googlemock/test/*.cc,[10] = extern/__include__/GoogleTest/googletest/test/**/*.cc,[11] = extern/__include__/GoogleTest/googlemock/test/**/*.cc,[12] = extern/__include__/GoogleTest/googletest/samples/*.cc,[13] = extern/__include__/GoogleTest/googlemock/samples/*.cc,[14] = extern/__include__/GoogleTest/googletest/samples/**/*.cc,[15] = extern/__include__/GoogleTest/googlemock/samples/**/*.cc,[16] = extern/__include__/GoogleTest/googlemock/src/gmock_main.cc,[17] = extern/__include__/GoogleTest/googlemock/src/gmock-cardinalities.cc,[18] = extern/__include__/GoogleTest/googlemock/src/gmock-internal-utils.cc,[19] = extern/__include__/GoogleTest/googlemock/src/gmock-matchers.cc,[20] = extern/__include__/GoogleTest/googlemock/src/gmock-spec-builders.cc,[21] = extern/__include__/GoogleTest/googlemock/src/gmock.cc,[22] = extern/__include__/GoogleTest/googletest/src/gtest_main.cc,[23] = extern/__include__/GoogleTest/googletest/src/gtest-assertion-result.cc,[24] = extern/__include__/GoogleTest/googletest/src/gtest-death-test.cc,[25] = extern/__include__/GoogleTest/googletest/src/gtest-filepath.cc,[26] = extern/__include__/GoogleTest/googletest/src/gtest-matchers.cc,[27] = extern/__include__/GoogleTest/googletest/src/gtest-port.cc,[28] = extern/__include__/GoogleTest/googletest/src/gtest-printers.cc,[29] = extern/__include__/GoogleTest/googletest/src/gtest-test-part.cc,[30] = extern/__include__/GoogleTest/googletest/src/gtest-typed-test.cc,[31] = extern/__include__/GoogleTest/googletest/src/gtest.cc,[32] = extern/__include__/PugiXml/tests/*.cpp,[33] = extern/__include__/PugiXml/docs/**/*.cpp,[34] = extern/__include__/DearImGui/examples/**.cpp,[35] = extern/__include__/DearImGui/misc/**/*.cpp,[36] = extern/__include__/DearImGui/backends/*allegro5.cpp,[37] = extern/__include__/DearImGui/backends/*android.cpp,[38] = extern/__include__/DearImGui/backends/*dx10.cpp,[39] = extern/__include__/DearImGui/backends/*dx11.cpp,[40] = extern/__include__/DearImGui/backends/*dx12.cpp,[41] = extern/__include__/DearImGui/backends/*dx9.cpp,[42] = extern/__include__/DearImGui/backends/*glfw.cpp,[43] = extern/__include__/DearImGui/backends/*opengl*.cpp,[44] = extern/__include__/DearImGui/backends/*glut.cpp,[45] = extern/__include__/DearImGui/backends/*metal.cpp,[46] = extern/__include__/DearImGui/backends/*osx.h,[47] = extern/__include__/DearImGui/backends/*sdl3.cpp,[48] = extern/__include__/DearImGui/backends/*sdlrenderer3.cpp,[49] = extern/__include__/DearImGui/backends/*wgpu.cpp,[50] = extern/__include__/DearImGui/backends/*win32.cpp,} 
+---------------------------------
+---------------------------------

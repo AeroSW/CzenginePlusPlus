@@ -21,8 +21,8 @@
 *.smod
 
 Makefile
-CzenginePlusPlus.make
-
+*.make
+imgui.ini
 # Compiled Static libraries
 *.lai
 *.la
@@ -48,3 +48,4 @@ CzenginePlusPlus.make
 !extern/__include__/DearImGui
 !extern/__include__/PugiXml
 !extern/__include__/GoogleTest
+!extern/__include__/JoMock
