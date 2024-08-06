@@ -35,7 +35,6 @@ The project is using Dear ImGui for implementing an interface, and I'm utilizing
 1) Open CLI Utility (Terminal on Unix) and execute `czengine build --target CzenginePlusPlus`
    - This should execute `premake5 gmake2` and `make CzenginePlusPlus CXX=g++ config=debug_win64` (I have a symlink for MinGW's `mingw32-make.exe` to `make.exe`.)
 1) Ensure Vulkan library can be found by Premake5's makefiles
-1) Currently Premake5 and makefiles  build with `--debug` flag, so output of executable will be in `bin/Win64/Debug`
 
 ## TODO
 - [ ] Review Dear ImGui Vulkan Implementation.  (I should be able to pull windows out of window.) <---- Next task(s)
