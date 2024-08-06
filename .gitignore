@@ -21,8 +21,8 @@
 *.smod
 
 Makefile
-CzenginePlusPlus.make
-
+*.make
+imgui.ini
 # Compiled Static libraries
 *.lai
 *.la
@@ -44,6 +44,11 @@ CzenginePlusPlus.make
 /obj
 /lib
 /scripts/__pycache__
+scripts/src/czengine.egg-info/
 /extern
 !extern/__include__/DearImGui
 !extern/__include__/PugiXml
+!extern/__include__/GoogleTest
+!extern/__include__/JoMock
+/premake5/logs
+/premake5/logs/*

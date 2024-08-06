@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "czengine"
+requires-python = ">= 3.12"
+version = "0.0.1"
+
+[project.scripts]
+czengine = "czengine:main"

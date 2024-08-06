@@ -1,0 +1,25 @@
+---------------------------------
+---------------------------------
+Premake5 build [CzenginePlusPlus]
+---------------------------------
+---------------------------------
+Linked Libraries
+---------------------------------
+{ [1] = ./extern/__vendor__/Vulkan/Bin,[2] = ./extern/__vendor__/SDL2/bin,[3] = ./extern/__vendor__/SDL2_ttf/bin,} 
+---------------------------------
+---------------------------------
+Included Library Headers
+---------------------------------
+{ [1] = ./include/**,[2] = ./extern/__include__/DearImGui/,[3] = ./extern/__include__/DearImGui/**,[4] = ./extern/__include__/PugiXml/src,[5] = ./extern/__include__/Toml++/include,[6] = ./extern/__include__/Toml++/include/**,[7] = ./extern/__vendor__/SDL2/include/**,[8] = ./extern/__vendor__/SDL2/include/SDL2/**,[9] = ./extern/__vendor__/SDL2_ttf/include/**,[10] = ./extern/__vendor__/SDL2_ttf/include/SDL2/**,[11] = ./extern/__vendor__/Vulkan/Include,[12] = ./extern/__include__/GoogleTest/googletest,[13] = ./extern/__include__/GoogleTest/googlemock,[14] = ./extern/__include__/GoogleTest/googletest/include,[15] = ./extern/__include__/GoogleTest/googlemock/include,[16] = ./extern/__include__/JoMock/jomock,} 
+---------------------------------
+---------------------------------
+Linked Static and Dynamic Libraries
+---------------------------------
+function: 0000027DFBBB8470
+---------------------------------
+---------------------------------
+Removed Files
+---------------------------------
+{ [1] = extern/__vendor__/**/*.cpp,[2] = tst/*.cpp,[3] = tst/**/*.cpp,} 
+---------------------------------
+---------------------------------

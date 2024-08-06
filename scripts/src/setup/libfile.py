@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from shared import AnsiColors
+from utility.shared import AnsiColors
 from zipfile import ZipFile
 
 import shutil

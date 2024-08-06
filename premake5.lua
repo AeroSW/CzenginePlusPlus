@@ -1,58 +1,75 @@
-function dump(o)
-    if type(o) == 'table' then
-       local s = '{ '
-       for k,v in pairs(o) do
-          if type(k) ~= 'number' then k = '"'..k..'"' end
-          s = s .. '['..k..'] = ' .. dump(v) .. ','
-       end
-       return s .. '} '
-    else
-       return tostring(o)
-    end
- end
+---@diagnostic disable: undefined-global
+require "premake5.extern"
+require "premake5.utils"
 
-function addLib(lib_list, path, lib_name)
-    local lib_path = path .. "/" .. lib_name
-    print(lib_path)
-    if os.isdir(lib_path) then
-        table.insert(lib_list, lib_path)
-    else
-        local libs = os.findlib(lib_name)
-        table.insert(lib_list, os.findlib(lib_name))
-    end
-    return lib_list
+local LOG_FILE = nil
+local PRINT_MSG = function(msg)
+    print(msg)
 end
-function addInclude(inc_list, path, lib_name, include_path)
-    local lib_path = path .. "/" .. lib_name
-    local inc_path
-    if os.isdir(lib_path) then
-        inc_path = { lib_path .. "/" .. include_path }
-    else
-        inc_path = os.findheader(lib_name)
+
+function setup(proj_name)
+    local path_sep = package.config:sub(1,1)
+    local log_path = "." .. path_sep .. "premake5" .. path_sep .. "logs"
+
+    if (os.isdir(log_path) == false) then
+        PRINT_MSG("Log directory for Premake5 does not exist...\nCreating directory [premake5/logs]")
+        os.execute("mkdir " .. log_path)
     end
-    if inc_path ~= nil and type(next(inc_path)) ~= "nil" then
-        for _, inc in ipairs(inc_path) do
-            table.insert(inc_list, inc)
+    LOG_FILE = io.open("./premake5/logs/premake5." .. proj_name .. ".log", "w")
+    if (LOG_FILE) then
+        PRINT_MSG = function(msg)
+            LOG_FILE:write(msg .. "\n")
+            LOG_FILE:flush()
         end
     end
-    return inc_list
 end
-function addDlls(dll_list, path, lib_name, dll_query)
-    local lib_path = path .. "/" .. lib_name
-    local dll_path
-    if os.isdir(lib_path) then
-        dll_path = os.matchfiles(lib_path .. "/**.dll")
-    else
-        dll_path = os.locate(dll_query)
-    end
-    if dll_path ~= nil and type(next(dll_path)) ~= "nil" then
-        local dlls = table.translate(dll_path, path.getname)
-        for _, dll in ipairs(dll_path) do
-            table.insert(dll_list, dll)
+
+function cleanup()
+    if (LOG_FILE) then
+        LOG_FILE:close()
+        LOG_FILE = nil
+        -- Reset PRINT_MSG to use default console `print`
+        PRINT_MSG = function(msg)
+            print(msg)
         end
     end
-    return dll_list
 end
+
+local spacer = "---------------------------------"
+local double_spacer = spacer .. "\n" .. spacer
+
+function printSection(header, body)
+    PRINT_MSG(header)
+    PRINT_MSG(spacer)
+    PRINT_MSG(body)
+    PRINT_MSG(double_spacer)
+end
+
+function setupSharedPremakeConfig(addtnl_build_cmds)
+    setmetatable(addtnl_build_cmds, {__index={def_value=""}})
+    local build_cmds = addtnl_build_cmds[1] or addtnl_build_cmds.def_value
+    bo = "-std=c++23 " .. build_cmds
+    buildoptions { "-std=c++23 " .. (build_cmds) }
+    filter "files:**"
+    buildcommands {
+        "make %{cfg.buildcfg} " .. (build_cmds)
+    }
+    rebuildcommands {
+        "make %{cfg.buildcfg} rebuild"
+    }
+    cleancommands {
+        "make clean ${cfg.buildcfg}"
+    }
+    postbuildcommands {}
+    filter "configurations:Debug"
+        defines {"DEBUG"}
+        symbols "On"
+    filter "configurations:Release"
+        defines {"NDEBUG"}
+        optimize "On"
+    makesettings {'CC=g++', 'CXX=g++'}
+end
+
 
 workspace "CzenginePlusPlus"
     configurations {"Debug", "Release"}
@@ -62,89 +79,54 @@ project "CzenginePlusPlus"
     language "C++"
     system "Windows"
     architecture "x86_64"
-    local lib_list = {}
-    local include_list = { 
-        "./include/**",
-        "./extern/__include__/DearImGui/",
-        "./extern/__include__/DearImGui/**",
-        "./extern/__include__/PugiXml/src",
-        "./extern/__include__/Toml++/include",
-        "./extern/__include__/Toml++/include/**",
-        "./extern/__vendor__/Vulkan/Include/**"
-    }
-    local link_list = {}
 
-    -- Add external libraries...  TODO: Adjust to list and for-loop
-    extern_libs_with_include_folder = { "SDL2", "SDL2_ttf"}
-    for _, extern_lib in ipairs(extern_libs_with_include_folder) do
-        lib_list = addLib(lib_list, "./extern/__vendor__", extern_lib)
-        --include_list = addInclude(include_list, "./extern/__vendor__", extern_lib, "include/**")
-        link_list = addDlls(link_list, "./extern/__vendor__", extern_lib, extern_lib .. ".dll")
-    end
-    extern_libs_with_Include_folder = {"Vulkan"}
-    for _, extern_lib in ipairs(extern_libs_with_Include_folder) do
-        --table.insert(lib_list, "lib/Vulkan/Lib/vulkan-1")
-        --lib_list = addLib(lib_list, "./lib", extern_lib)
-        include_list = addInclude(include_list, "./extern/__vendor__", extern_lib, "Include")
-        table.insert(lib_list, "./lib/Vulkan/Bin")
-        --link_list = addDlls(link_list, "./lib", extern_lib, extern_lib .. ".dll")
-    end
-
-    links { "./extern/__vendor__/Vulkan/Lib/vulkan-1" }
-
-    print("lib dump")
-    print(dump(lib_list))
-    print("include dump")
-    print(dump(include_list))
-    print("link dump")
-    print(dump(link_list))
-
-    libdirs { table.unpack(lib_list) }
-    linkoptions { table.concat(link_list, " ") .. " -std=c++23 -mwindows" }
-    includedirs { table.unpack(include_list) }
-    files {"**.hpp","**.h","**.cpp"}
+    -- Project Configuration
+    setup("CzenginePlusPlus")
+    PRINT_MSG(double_spacer)
+    PRINT_MSG("Premake5 build [CzenginePlusPlus]")
+    PRINT_MSG(double_spacer)
+    printSection("Linked Libraries", prettyPrintTable(libs))
+    libdirs { table.unpack(libs) }
+    printSection("Included Library Headers", prettyPrintTable(includes))
+    includedirs { table.unpack(includes) }
+    printSection("Linked Static and Dynamic Libraries", prettyPrintTable(links))
+    links { table.unpack(slinks) }
+    printSection("Removed Files", prettyPrintTable({ table.unpack(excludes), "tst/*.cpp", "tst/**/*.cpp" }))
+    files {"**.hpp","**.h","**.cpp","**.cc"}
     removefiles {
-        "extern/__vendor__/**/*.cpp", 
-        "extern/__vendor__/**/*.c",
-        "extern/__include__/PugiXml/tests/*.cpp",
-        "extern/__include__/PugiXml/docs/**/*.cpp",
-        "extern/__include__/DearImGui/examples/**.cpp",
-        "extern/__include__/DearImGui/misc/**/*.cpp",
-        "extern/__include__/DearImGui/backends/*allegro5.cpp", -- Remove DearImGui Backends not being used.
-        "extern/__include__/DearImGui/backends/*android.cpp",
-        "extern/__include__/DearImGui/backends/*dx10.cpp",
-        "extern/__include__/DearImGui/backends/*dx11.cpp",
-        "extern/__include__/DearImGui/backends/*dx12.cpp",
-        "extern/__include__/DearImGui/backends/*dx9.cpp",
-        "extern/__include__/DearImGui/backends/*glfw.cpp",
-        "extern/__include__/DearImGui/backends/*opengl*.cpp",
-        "extern/__include__/DearImGui/backends/*glut.cpp",
-        "extern/__include__/DearImGui/backends/*metal.cpp",
-        "extern/__include__/DearImGui/backends/*osx.h",
-        "extern/__include__/DearImGui/backends/*sdl3.cpp",
-        "extern/__include__/DearImGui/backends/*sdlrenderer3.cpp",
-        "extern/__include__/DearImGui/backends/*wgpu.cpp",
-        "extern/__include__/DearImGui/backends/*win32.cpp"
+        "extern/__include__/GoogleTest/**/*.cc",  -- Exclude unit test frameworks from Main build.
+        "extern/__include__/GoogleTest/**/*.h",
+        "extern/__include__/JoMock/**/*.cpp",
+        "extern/__include__/JoMock/**/*.h",
+        "tst/*.cpp",
+        "tst/**/*.cpp",
+        table.unpack(excludes)
     }
-    buildoptions "-std=c++23 -mwindows"
-    filter "files:**"
-    buildcommands {
-        "make %{cfg.buildcfg} -mwindow",
-        "cp -rf czengine-interface/ \"%[bin/project.config]\"",
-    }
-    rebuildcommands {
-        "make %{cfg.buildcfg} rebuild"
-    }
-    cleancommands {
-        "make clean ${cfg.buildcfg}"
-    }
-    postbuildcommands {
-        "cp -rf czengine-interface/ \"%[bin/project.config]\""
-    }
-    filter "configurations:Debug"
-        defines {"DEBUG"}
-        symbols "On"
-    filter "configurations:Release"
-        defines {"NDEBUG"}
-        optimize "On"
-    makesettings {'CC=g++', 'CXX=g++'}
+    cleanup()
+    setupSharedPremakeConfig({ "-mwindows" })
+
+project 'CzengineTest'
+    kind "ConsoleApp"
+    language "C++"
+    system "Windows"
+    architecture "x86_64"
+
+    -- Test Configuration
+    setup("CzengineTest")
+    PRINT_MSG(double_spacer)
+    PRINT_MSG("Premake5 build [CzenginePlusPlus]")
+    PRINT_MSG(double_spacer)
+    printSection("Linked Libraries", prettyPrintTable(libs))
+    libdirs { table.unpack(libs) }
+    printSection("Included Library Headers", prettyPrintTable(includes))
+    includedirs { "tst/**", table.unpack(includes) }
+    printSection("Linked Static and Dynamic Libraries", prettyPrintTable(links))
+    links { slinks }
+    -- As an engineer, I want to assume the best for my peers and assume the external
+    -- libraries included in this project are tested and building.
+    files {"**.hpp","**.h","**.cpp","**.cc"}
+    printSection("Files being excluded from build", prettyPrintTable({ "./src/run-czengine.cpp", table.unpack(excludes) }))
+    removefiles { "src/run-czengine.cpp", table.unpack(excludes) }
+    cleanup()
+    setupSharedPremakeConfig({})
+

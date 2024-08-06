@@ -1,4 +1,4 @@
-from shared import AnsiColors
+from utility.shared import AnsiColors
 from libfile import getFileName
 import os
 import pip._vendor.requests as requests
