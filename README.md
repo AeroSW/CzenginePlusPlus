@@ -23,17 +23,20 @@ The project is using Dear ImGui for implementing an interface, and I'm utilizing
 | JoMock | - | Yes |
 
 ## Setup <sup><sub>*(Work in Progress)*</sub></sup>
+1) After cloning repository locally, also execute `git submodule update --init --recursive` to recursively install submodules.
+   - I plan to add this to the `setup.py` at some point, but it isn't necessary just yet.
 1) Install Premake5
 1) Install MinGW
 1) Create a **symlink** for MinGW's `mingw32-make.exe` to a file named `make.exe` in the same directory.
-   - [For windows on HowToGeek Website](https://www.howtogeek.com/16226/complete-guide-to-symbolic-links-symlinks-on-windows-or-linux/)
+   - [Symlink instructions for windows (HowToGeek Website)](https://www.howtogeek.com/16226/complete-guide-to-symbolic-links-symlinks-on-windows-or-linux/)
 1) Install Python 3.12, After Python 3.12 is installed, follow sub-steps below
+   1) Execute `python scripts/src/setup/setup.py` and follow text prompts. 
+      - This installs dependencies used by project. (Excluding **git** submodules)
    1) Run the command `python -m pip install ./scripts`.  This installs the `czengine` command line tool for building and launching Czengine.
    1) Now try `czengine --help`. It should print out the commands [czengine] can execute.
    1) Now try `czengine build --help`.  It should print out the help guide for the `build` command.
-1) Execute `python scripts/src/setup/setup.py` and follow text prompts.
 1) Open CLI Utility (Terminal on Unix) and execute `czengine build --target CzenginePlusPlus`
-   - This should execute `premake5 gmake2` and `make CzenginePlusPlus CXX=g++ config=debug_win64` (I have a symlink for MinGW's `mingw32-make.exe` to `make.exe`.)
+   - This should execute `premake5 gmake2` and `make CzenginePlusPlus CXX=g++ config=debug_win64`
 1) Ensure Vulkan library can be found by Premake5's makefiles
 
 ## TODO
@@ -43,3 +46,4 @@ The project is using Dear ImGui for implementing an interface, and I'm utilizing
 - [ ] Work on Render Pipeline
 - [X] Replace usage of `build.sh` with another Python script/flag (Finished)
 - [ ] Add installs for Python and Premake5
+- [ ] Combine Python `setup.py` as another command in `czengine.py`.
