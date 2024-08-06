@@ -1,7 +1,7 @@
 # Imports
 from download import downloadDependency, isVulkanPresent
 from libfile import HandleDetails, handleZip, handleExe, handleOtherFiles, getFileName
-from shared import AnsiColors
+from utility.shared import AnsiColors
 from typing import List
 import argparse
 import platform as sys_platform

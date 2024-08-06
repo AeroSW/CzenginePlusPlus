@@ -44,6 +44,7 @@ imgui.ini
 /obj
 /lib
 /scripts/__pycache__
+scripts/src/czengine.egg-info/
 /extern
 !extern/__include__/DearImGui
 !extern/__include__/PugiXml
